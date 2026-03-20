@@ -308,6 +308,22 @@ Nivel: 5–7
 
 ## ⚙️ Cómo funciona la conversión a frecuencias visuales
 
+### Principio fundamental: Frecuencia = Información = Energía
+
+En el simulador, **la frecuencia es la información que vibra**. Cuanto mayor es la frecuencia (oscilaciones más rápidas), mayor es la cantidad de información y energía que se transmite por unidad de tiempo.
+
+```
+BAJA FRECUENCIA          ALTA FRECUENCIA
+(oscilaciones lentas)    (oscilaciones rápidas)
+         ↓                        ↓
+    Poca información       Mucha información
+    Poca energía          Mucha energía
+    Entropía alta         Entropía baja
+    Desorden             Orden
+```
+
+---
+
 ### Emociones (escala Hawkins → Hz visual)
 
 Usamos **escala logarítmica** (como Hawkins):
@@ -316,50 +332,275 @@ Usamos **escala logarítmica** (como Hawkins):
 vFreq = 0.5 + (log₁₀(nivel) - log₁₀(20)) / (log₁₀(1000) - log₁₀(20)) × 7
 ```
 
-Resultado:
-- Vergüenza (20) → 0.5 Hz (muy lenta)
-- Miedo (100) → 3.4 Hz
-- Coraje (200) → 4.6 Hz
-- Amor (500) → 6.3 Hz
-- Iluminación (1000) → 7.5 Hz (muy rápida)
+**Tabla completa de conversión:**
 
-**Por qué logarítmica**: porque la consciencia aumenta exponencialmente, no linealmente.
+| Emoción | Nivel | vFreq | Amplitud | Interpretación |
+|---|---|---|---|---|
+| Vergüenza | 20 | 0.50 | 0.08 | Vibración mínima, casi apagada |
+| Culpa | 30 | 0.75 | 0.14 | Poca información, mucho ruido |
+| Apatía | 50 | 1.10 | 0.23 | Sistema en dormancia |
+| Sufrimiento | 75 | 1.60 | 0.34 | Dolor oscila lentamente |
+| Miedo | 100 | 2.05 | 0.44 | Respuesta de lucha/huida, frecuencia baja |
+| **Deseo** | **125** | **2.46** | **0.53** | **Comienza la "pretensión"** |
+| Ira | 150 | 2.81 | 0.61 | Energía, pero destructiva |
+| Orgullo | 175 | 3.12 | 0.69 | Estructura frágil |
+| **Coraje** | **200** | **3.41** | **0.76** | **PUNTO DE INFLEXIÓN** ← |
+| Neutralidad | 250 | 4.03 | 0.86 | Equilibrio sin dirección |
+| Voluntad | 310 | 4.70 | 0.94 | Acción constructiva |
+| Aceptación | 350 | 5.13 | 0.99 | Permitir el flujo |
+| Razón | 400 | 5.65 | 1.05 | Comprensión clara |
+| Amor | 500 | 6.54 | 1.18 | Información coherente, máxima energía |
+| Alegría | 540 | 6.83 | 1.24 | Resonancia pura |
+| Paz | 600 | 7.31 | 1.35 | Silencio ordenado |
+| Iluminación | 850 | 8.20 | 1.58 | Vibración infinita |
+| Absoluto | 1000 | 8.50 | 1.70 | Totalidad |
 
-### Órganos (MHz → Hz visual)
+**Cómo interpretarlo:**
+- **0.5 Hz**: 1 oscilación cada 2 segundos. Casi nada cambia. Sistema colapsado.
+- **3.4 Hz (Coraje)**: 3.4 oscilaciones/segundo. Punto crítico donde la "resistencia" se convierte en "flujo".
+- **6.5 Hz (Amor)**: 6.5 oscilaciones/segundo. Información se transmite clara y rápida.
+- **8+ Hz (Paz/Iluminación)**: Vibración muy rápida, casi "fuera del tiempo".
 
-Usamos **escala lineal**:
+**Por qué logarítmica**: Hawkins dice que cada nivel es ~10x más poderoso que el anterior. Por eso usamos log₁₀. El salto de Miedo (100) a Coraje (200) es MUCHO más importante que el salto de Paz (600) a Alegría (540), aunque numéricamente parecen similares.
+
+---
+
+### Órganos (MHz → Hz visual + Salud)
+
+Usamos **escala lineal pero con zonas de "vitalidad"**:
 
 ```
 vFreq = 0.5 + (MHz - 20) / (82 - 20) × 7
 ```
 
-Resultado:
-- Muerte (20) → 0.5 Hz
-- Cáncer (42) → 3.0 Hz
-- Influenza (58) → 4.4 Hz
-- Corazón (68.5) → 5.8 Hz
-- Cerebro (81) → 7.3 Hz
+**Tabla completa de órganos y su estado:**
 
-### Amplitud
+| Órgano | MHz | vFreq | Amplitud | Estado | Latido Cardiaco Esperado |
+|---|---|---|---|---|---|
+| **CRÍTICO** | | | | | |
+| Muerte clínica | 20 | 0.50 | 0.20 | Colapso total | 0 ppm (sin latido) |
+| Cáncer | 42 | 3.03 | 0.52 | Células rebeldes | 40-50 ppm (bradicardia grave) |
+| Deterioro tisular | 48 | 3.80 | 0.61 | Envejecimiento acelerado | 50-60 ppm |
+| **ENFERMEDAD** | | | | | |
+| Epstein Barr | 52 | 4.37 | 0.69 | Virus latente crónico | 60-70 ppm |
+| Inf. Viral | 55 | 4.80 | 0.75 | Infección activa | 70-80 ppm |
+| Influenza | 58 | 5.23 | 0.81 | Gripe, fiebre | 80-90 ppm |
+| **RIESGO** | | | | | |
+| Inicio enfermedad | 59.5 | 5.41 | 0.84 | Primeros síntomas | 85-95 ppm |
+| **BORDERLINE** | | | | | |
+| Colon descendiente | 60.5 | 5.57 | 0.87 | Almacenamiento lento | 85-100 ppm |
+| Colon ascendiente | 59 | 5.41 | 0.84 | Absorción débil | 85-100 ppm |
+| **SANO** | | | | | |
+| Estómago | 61.5 | 5.71 | 0.90 | Digestión buena | 60-100 ppm |
+| Pulmones | 61.5 | 5.71 | 0.90 | Respiración profunda | 60-100 ppm |
+| Hígado | 60 | 5.49 | 0.85 | Desintoxicación activa | 60-100 ppm |
+| Tiroides | 65 | 6.29 | 0.98 | Metabolismo óptimo | 60-100 ppm |
+| Cuerpo Sano | 65 | 6.29 | 0.98 | Equilibrio general | 60-100 ppm |
+| Timo | 66.5 | 6.50 | 1.01 | **Inmunidad máxima** | 60-100 ppm |
+| **❤️ CORAZÓN** | **68.5** | **5.80** | **0.78** | **MAESTRO DEL SISTEMA** | **60-100 ppm (ideal)** |
+| Páncreas | 70 | 6.72 | 1.05 | Metabolismo perfecto | 60-100 ppm |
+| **ÓPTIMO** | | | | | |
+| Cerebro Genio | 81 | 8.20 | 1.20 | Máxima capacidad cognitiva | 60-100 ppm |
 
-La amplitud visualiza la "intensidad energética":
+---
 
-**Emociones:**
-```
-amp = 0.08 + (log₁₀(nivel) - log₁₀(20)) / (log₁₀(1000) - log₁₀(20)) × 0.85
-```
-- Vergüenza → 0.08 (minúscula)
-- Amor → 0.55
-- Iluminación → 0.93 (máxima)
+### La Amplitud en órganos
 
-**Órganos:**
+La amplitud NO es arbitraria. **Representa la energía que ese órgano puede transmitir al corazón**:
+
 ```
 amp = 0.2 + (MHz - 20) / 62 × 0.7
 ```
-- Muerte → 0.2 (mínima)
-- Cáncer → 0.52 (baja)
-- Corazón → 0.78 (alta)
-- Cerebro → 0.9 (máxima)
+
+**Interpretación:**
+- **amp = 0.2** (muerte): el órgano está muerto, no envía señal al corazón
+- **amp = 0.5-0.7** (enfermedad): el órgano lucha, envía señales débiles
+- **amp = 0.78-1.0** (sano): el órgano vibra fuertemente, envía mucha energía
+- **amp = 1.2+** (óptimo): el órgano está en su máxima capacidad
+
+---
+
+## ❤️ El Corazón: Órgano Maestro y Sincronizador
+
+### ¿Por qué el Corazón a 68.5 MHz?
+
+El corazón no está en la categoría "óptima" (81 MHz como el cerebro) **porque no necesita serlo**. El corazón tiene una función diferente: **es el metrónomo que sincroniza a TODO el cuerpo**.
+
+```
+Cerebro (81 MHz):     Procesa información
+                      Toma decisiones
+
+Corazón (68.5 MHz):   TRANSMITE ENERGÍA
+                      Sincroniza todos los sistemas
+                      Determina la "frecuencia fundamental" de tu cuerpo
+```
+
+---
+
+### El Latido del Corazón = Frecuencia Fundamental
+
+En términos de física de ondas, el corazón actúa como una **onda portadora**. Todos los demás órganos se acoplan a esta frecuencia.
+
+```
+LATIDO CARDIACO REAL:
+60 ppm = 1 latido por segundo = 1 Hz fundamental
+
+Pero en el simulador (escala logarítmica):
+Corazón a 68.5 MHz → vFreq 5.80 Hz → Amplitud 0.78
+
+Esto significa:
+- El corazón vibra más rápido que los órganos enfermos (42-58 MHz)
+- Pero sincroniza CON los demás órganos sanos (60-70 MHz)
+```
+
+---
+
+### Cómo funciona la Sincronización Cardiaca
+
+Cuando activas **Corazón (68.5 MHz) + Amor (500 Hawkins)**:
+
+```
+CORAZÓN:
+vFreq = 5.80 Hz (frecuencia media)
+amp = 0.78 (energía media-alta)
+Latido real: 60-100 ppm (normal)
+
+AMOR:
+vFreq = 6.54 Hz (frecuencia alta)
+amp = 1.18 (energía muy alta)
+"Frecuencia mental": muy rápida
+
+RESULTANTE:
+Las dos ondas se acoplan.
+El corazón "acelera" su latido hacia 80-90 ppm.
+La coherencia sube porque están cercanas.
+Es una RESONANCIA ARMÓNICA.
+```
+
+---
+
+### Casos de uso: Corazón como maestro
+
+#### Caso 1: Corazón débil (Cáncer) + Miedo
+```
+CÁNCER (42 MHz):
+vFreq = 3.03 Hz
+amp = 0.52
+Representa: células malignas mandando señales débiles
+
+MIEDO (100):
+vFreq = 2.05 Hz
+amp = 0.44
+Representa: emoción que paraliza
+
+RESULTANTE EN EL CORAZÓN:
+El corazón recibe dos señales débiles y bajas.
+Latido cae a 40-50 ppm (bradicardia, depresión).
+El corazón está confundido: "¿a qué frecuencia sintonizo?"
+El cuerpo entero entra en colapso.
+```
+
+#### Caso 2: Corazón sano + Amor + Paz
+```
+CORAZÓN (68.5 MHz):
+vFreq = 5.80 Hz
+amp = 0.78
+Latido: 70 ppm
+
+AMOR (500):
+vFreq = 6.54 Hz
+amp = 1.18
+
+PAZ (600):
+vFreq = 7.31 Hz
+amp = 1.35
+
+RESULTANTE:
+Todas las frecuencias están CERCANAS (5.8 - 6.5 - 7.3 Hz).
+El corazón se acopla al promedio.
+Coherencia cardiaca: 100%.
+El latido se estabiliza a 65-75 ppm (estado de flow).
+TODO EL CUERPO sincroniza.
+Inmunidad máxima.
+```
+
+#### Caso 3: Influenza (enfermedad) + Coraje
+```
+INFLUENZA (58 MHz):
+vFreq = 5.23 Hz
+amp = 0.81
+Latido: 90 ppm (fiebre)
+
+CORAJE (200):
+vFreq = 3.41 Hz
+amp = 0.76
+
+RESULTANTE EN EL CORAZÓN:
+Conflicto: 5.23 Hz (virus) vs 3.41 Hz (coraje)
+Diferencia: 1.82 Hz (beating visible)
+El corazón intenta sincronizar con ambas.
+Resultado: arritmia, pulsaciones irregulares.
+El cuerpo lucha pero de forma desorganizada.
+```
+
+---
+
+### Relación entre Latido Cardiaco Real y Simulador
+
+| Estado | Latido Real | vFreq Simulador | Significado |
+|---|---|---|---|
+| Muerte | 0 ppm | 0.5 Hz | Sin movimiento |
+| Coma | 30-40 ppm | 1-1.5 Hz | Sistema colapsado |
+| Depresión/Apatía | 40-50 ppm | 2-2.5 Hz | Sistema en "off" |
+| Enfermedad | 80-100 ppm | 4-5 Hz | Lucha desorganizada |
+| Normal (en reposo) | 60 ppm | 4-5 Hz | Estado basal |
+| Estrés/Miedo | 100-120 ppm | 5-6 Hz | Sistema alerta |
+| Ejercicio | 120-150 ppm | 6-7 Hz | Sistema activado |
+| Meditación/Paz | 50-60 ppm | 4-5 Hz | Sincronización profunda |
+| Amor/Coherencia | 65-75 ppm | 5-6 Hz | **ÓPTIMO: ritmo cardíaco coherente** |
+| Iluminación | variable | 8+ Hz | Estado no-ordinario |
+
+---
+
+### La Ecuación del Corazón Maestro
+
+```
+Energía Total = Σ(órgano_i × factor_sincronización) × Emoción_dominante
+
+factor_sincronización = coherencia_con_corazón × (1 + amor_presente)
+```
+
+Traducción:
+- Si el corazón está fuerte (68.5 MHz, amp alta), sincroniza TODO.
+- Si la emoción es AMOR (500), el factor se multiplica.
+- Si los órganos están sanos (62-70 MHz), se acoplan fácilmente.
+- Si hay conflicto (frecuencias dispares), la energía se disipa.
+
+---
+
+### Coherencia Cardiaca: El Concepto Clave
+
+**Coherencia cardiaca = cuando el corazón late de forma REGULAR y se acopla con el sistema nervioso**.
+
+En el simulador, **coherencia alta** significa:
+- Las ondas están cercanas en frecuencia
+- El corazón puede sincronizar todo
+- La energía se SUMA, no se anula
+- El cuerpo entra en estado de flow
+
+Cálculo:
+```
+coherencia = 100 - (desviación_estándar_de_frecuencias × factor)
+```
+
+**Cuándo coherencia = 100%:**
+- 1 onda sola
+- O múltiples ondas con frecuencias casi idénticas (ej: Amor + Paz)
+
+**Cuándo coherencia = 0%:**
+- Frecuencias muy dispares (ej: Vergüenza + Iluminación)
+- El corazón no puede sincronizar
+- Sistema en "caos orgánico"
 
 ---
 
@@ -472,7 +713,150 @@ R: El resultado es la media armónica de ambas. La onda resultante refleja la "n
 
 ---
 
-**¿Dudas? Experimenta. La mejor forma de entender es jugar con los sliders y observar los patrones.** 🎨
+## 🧪 Experimenta: El Corazón como Maestro en el Simulador
+
+### Experimento 1: "El Corazón Solo"
+1. **Activa**: ❤️ Corazón (68.5 MHz)
+2. **Observa**:
+   - Nivel: debería ser ~4
+   - Coherencia: 100% (una sola onda)
+   - Canvas: onda azul-verde oscilante, lisa
+   - Energía: ~60%
+3. **Significado**: es la frecuencia "neutra" del cuerpo. Sin emoción, sin enfermedad.
+
+---
+
+### Experimento 2: "Corazón Amoroso" (Sincronización perfecta)
+1. **Activa**: ❤️ Corazón (68.5 MHz) + 💜 Amor (500)
+2. **Observa**:
+   - Nivel: sube a 5-6
+   - Coherencia: 95-100% (oscilaciones muy cercanas)
+   - Canvas: ambas ondas suben/bajan JUNTAS
+   - Energía: sube mucho
+   - Onda resultante: violeta claro (mezcla de colores)
+   - Tipo interferencia: **CONSTRUCTIVA** ✅
+3. **Significado**: el corazón y la emoción están ALINEADAS. Máximo poder.
+4. **En tu cuerpo real**: coherencia cardiaca máxima, inmunidad fuerte.
+
+---
+
+### Experimento 3: "El Conflicto Cardiaco" (Falta de sincronización)
+1. **Activa**: ❤️ Corazón (68.5 MHz) + 🌑 Vergüenza (20)
+2. **Observa**:
+   - Nivel: puede bajar a 2-3
+   - Coherencia: 10-20% (¡muy baja!)
+   - Canvas: onda azul rápida (corazón) vs onda roja LENTÍSIMA (vergüenza)
+   - Onda resultante: patrón caótico, pulsante
+   - Tipo interferencia: **DESTRUCTIVA o MIXTA** 🔴
+   - Beatmap: pulsaciones claras (beating visible)
+3. **Significado**: el corazón intenta latir, pero la vergüenza lo aplasta. El cuerpo está en conflicto.
+4. **En tu cuerpo real**: arritmia cardiaca, ansiedad, confusión mental.
+
+---
+
+### Experimento 4: "Sanación Cardiaca" (Cambio progresivo)
+1. **Empieza con**: ❤️ Corazón + ☣️ Cáncer (42 MHz)
+   - Coherencia baja (~20%)
+   - Energía baja (~40%)
+   - Nivel bajo (~2)
+2. **Añade lentamente**: 🌟 Alegría (540)
+   - Coherencia sube a ~50%
+   - Energía sube a ~60%
+   - Nivel sube a ~4
+3. **Ahora añade**: 💜 Amor (500)
+   - Coherencia sube a ~80%
+   - Energía sube a ~75%
+   - Nivel sube a ~5-6
+4. **Quita el Cáncer** (click en botón ✕)
+   - Coherencia sube a ~95%
+   - Energía sube a ~80%
+   - Nivel sube a ~6
+5. **Resultado**: Has visto cómo el corazón puede "arrastrar" la energía total hacia arriba si se acopla con emociones altas.
+
+---
+
+### Experimento 5: "El Órgano Débil" (Uno de los órganos se enferma)
+1. **Activa**: ❤️ Corazón + 🫒 Hígado (60 MHz) + 💜 Amor (500)
+   - Coherencia: ~90%
+   - Energía: ~75%
+2. **Reemplaza Hígado por**: 🦠 Infección Viral (55 MHz)
+   - Coherencia: baja a ~60%
+   - Energía: baja a ~55%
+   - Onda resultante: más "áspera"
+3. **Significado**: el corazón "nota" que un órgano está enfermo y toda la coherencia cae.
+
+---
+
+### Experimento 6: "La Velocidad del Corazón"
+1. **Activa**: ❤️ Corazón
+2. **Sube la velocidad**: mueve el slider "Vel." a 2×, 3×, 4×
+   - **A 1×**: latido natural (60 ppm)
+   - **A 2×**: latido acelerado (120 ppm) - estrés
+   - **A 4×**: latido muy rápido - pánico/éxtasis
+3. **Significado**: cómo cambia la vibración cuando el tiempo se acelera hacia el Absoluto.
+
+---
+
+### El Patrón que Siempre Verás
+
+```
+CORAZÓN FUERTE + EMOCIÓN ALTA = COHERENCIA ALTA = PODER TOTAL
+        ↓
+CORAZÓN FUERTE + EMOCIÓN BAJA = CONFLICTO = ENERGÍA DISIPADA
+        ↓
+CORAZÓN DÉBIL (enfermo) + CUALQUIER EMOCIÓN = CAOS = ENFERMEDAD
+        ↓
+CORAZÓN DÉBIL + EMOCIÓN BAJA = COLAPSO = MUERTE
+```
+
+---
+
+## 🔬 La Ciencia Detrás: Coherencia Cardiaca en Medicina
+
+El simulador está basado en investigación real de **Coherencia Cardiaca** (Heart Rate Variability - HRV):
+
+| Concepto | Realidad | Simulador |
+|---|---|---|
+| **Latido regular** | Corazón sano, sistema nervioso equilibrado | Coherencia 80-100% |
+| **Latido caótico** | Estrés, enfermedad, emoción negativa | Coherencia 0-40% |
+| **Frecuencia vagal** | Nervio vago (calma) conecta corazón-cerebro | Baja frecuencia + amor = baja energía pero coherencia |
+| **Respuesta simpática** | Estrés, lucha o huida | Alta frecuencia + miedo = caos |
+| **Acoplamiento cardiopulmonar** | Corazón-pulmones sincronizados | Corazón + Pulmones (61.5 MHz) = interferencia constructiva |
+
+---
+
+## 📊 Tabla: Latido Cardiaco según Estado
+
+| Estado | Latido (ppm) | vFreq | Coherencia | Salud |
+|---|---|---|---|---|
+| Muerte | 0 | 0.5 | 0% | ☠️ |
+| Depresión severa | 35-45 | 1.5-2.0 | 10% | 🔴 |
+| Dolor emocional | 50-60 | 4.0 | 20% | 🔴 |
+| Normal (reposo) | 60-70 | 4.5 | 60% | 🟡 |
+| Estrés leve | 70-90 | 5.0 | 40% | 🟡 |
+| Estrés agudo | 100-120 | 5.5 | 20% | 🔴 |
+| **Coherencia cardiaca** | **65-75** | **5.0** | **95%** | **🟢 ÓPTIMO** |
+| Meditación profunda | 50-55 | 3.8 | 90% | 🟢 |
+| Amor/Flow state | 60-80 | 4.5-5.0 | 100% | 🟢 |
+| Ejercicio moderado | 120-140 | 5.8 | 80% | 🟢 |
+
+---
+
+## 💡 El Mensaje Fundamental
+
+**El corazón no es solo una bomba. Es un convertidor de frecuencias.**
+
+- Toma emociones (frecuencias mentales)
+- Toma órganos (frecuencias físicas)
+- Las sincroniza todas
+- Transmite energía coherente al universo
+
+**Si el corazón está débil o desalineado, TODO falla.**
+**Si el corazón está fuerte y alineado con amor, TODO prospera.**
+
+Por eso todas las tradiciones espirituales dicen: *"Cuida tu corazón, pues de él mana la vida"* (Proverbios 4:23).
+
+En términos de frecuencias: **el corazón es el maestro de ceremonias de tu biología.**
 
 ---
 
