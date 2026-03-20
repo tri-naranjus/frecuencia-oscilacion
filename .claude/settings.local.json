@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__Claude_Preview__preview_start",
+      "Bash(gh auth:*)",
+      "Bash(git init:*)",
+      "Bash(npx vercel:*)",
+      "Bash(git -C /c/Users/trina/frecuencia config user.email)",
+      "Bash(git -C /c/Users/trina/frecuencia config user.name)",
+      "Read(//c/Users/trina/**)",
+      "Bash(ssh -T git@github.com)",
+      "Bash(env)",
+      "Bash(git add:*)",
+      "Bash(git config:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(\"/c/Program Files/nodejs/node_modules/npm/bin/npx-cli.js\" vercel --yes)",
+      "Bash(node \"/c/Program Files/nodejs/node_modules/npm/bin/npx-cli.js\" vercel --yes)",
+      "Bash(git reset:*)"
+    ]
+  }
+}
