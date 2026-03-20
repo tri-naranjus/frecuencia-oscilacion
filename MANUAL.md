@@ -860,4 +860,165 @@ En términos de frecuencias: **el corazón es el maestro de ceremonias de tu bio
 
 ---
 
-*Última actualización: Marzo 2026*
+## ⚠️ Las Tres Escalas de Frecuencia (IMPORTANTE)
+
+### ¿Por qué las ondas cerebrales NO "pelean" realmente con las de los órganos?
+
+Excelente pregunta. Las ondas cerebrales y los órganos operan en **tres dominios completamente diferentes**:
+
+| Escala | Rango | Ejemplo | ¿Qué mide? | ¿Interfieren realmente? |
+|--------|-------|---------|-----------|------------------------|
+| **Ondas cerebrales** (brainwaves) | 0.5–40 Hz | Alpha 8–12 Hz | Actividad eléctrica en la corteza | ❌ NO con MHz |
+| **Frecuencias de órganos** (Rife) | 20–82 MHz | Corazón 68.5 MHz | Vibración celular/molecular | ❌ NO con Hz |
+| **Escala Hawkins** (consciencia) | 20–1000 | Paz 600 | Nivel abstracto de consciencia | ⚙️ SIMBÓLICA |
+
+### ¿Entonces por qué el simulador las "mezcla"?
+
+Cuando el simulador **convierte todas al rango vFreq (0.5–7.5)**, está creando una **escala de visualización unificada**, no una escala física real. Es como:
+
+- Tomar tu frecuencia cardiaca (60–100 latidos/min)
+- Tu frecuencia respiratoria (12–20 respiraciones/min)
+- Tu frecuencia de parpadeo (15–20 parpadeos/min)
+- Ponerlas todas en la **misma gráfica visual**
+
+Visualmente se "interfieren" porque están en el mismo espacio, pero **biológicamente no interactúan** (tu corazón no "pelea" con tu respiración en Hz).
+
+### La Verdad Física
+
+En el cuerpo real:
+
+- **Ondas cerebrales (Hz)**: Generan campos electromagnéticos débiles que afectan **tu atención y estado mental**
+- **Frecuencias de órganos (MHz)**: Gobiernan **resonancia molecular** dentro de tus células
+- **Consciencia (Hawkins)**: Es el **patrón emergente** de cómo todas estas capas se sincronizan
+
+**Relación real**: Consciencia → Estado mental → Ondas cerebrales → Hormonas → Vibración celular
+
+Cuando activas **Paz (600)** en el simulador:
+1. Subconscientemte cambia tu estado mental
+2. Tu cerebro aumenta ondas Alpha (8–12 Hz)
+3. Liberas más oxitocina
+4. Tus células suben frecuencia (MHz)
+5. Tu coherencia cardiaca mejora
+
+### ¿Entonces el simulador está "mal"?
+
+**No.** El simulador es una **herramienta de enseñanza**, no una simulación de física real. Es como:
+- Un **diagrama de bloques** que muestra flujo de energía
+- Una **metáfora visual** de las capas de tu ser
+- Un **modelo educativo** para entender relaciones causa-efecto
+
+La "interferencia visual" en el canvas es una **analogía válida** de cómo tus diferentes capas (mente, cuerpo, emoción) se influyen entre sí.
+
+**Conclusión**: Las ondas cerebrales y de órganos no se "pelean" en Hz/MHz, pero sus **efectos sí interfieren** a nivel bioquímico. El simulador visualiza esa interferencia como patrón de ondas para ayudarte a **ver la relación**.
+
+---
+
+## ⚡ Pestaña Avanzado: Las 5 Fases del Entrenamiento de Coherencia
+
+La nueva pestaña **"⚡ Avanzado"** contiene 5 fases de entrenamiento basadas en ciencia de consciencia y medicina integrativa.
+
+### FASE 1: Entrenamiento Alfa-Theta (Study: PMC4741268)
+
+**Objetivo**: Detectar cuando las ondas Alpha (8–12 Hz) y Theta (4–8 Hz) dominan sobre Beta (>20 Hz).
+
+- Activa el botón "⚡ Iniciar Entrenamiento"
+- Luego activa **Paz (600)** en la pestaña Emociones
+- El sistema calcula un **"Bonus de Coherencia"** (+15%) cuando meditas
+- Enseña autorregulación: **la mente puede controlar la biología**
+
+**Beneficio**: Reduce ansiedad aumentando presencia de ondas lentas (Alpha/Theta).
+
+### FASE 2: Mapa de Resonancia Somática
+
+**Objetivo**: Visualizar cómo emociones bajas drenan órganos específicos.
+
+Cuando activas:
+- **Miedo (100)**: Drena Riñones (sistema de supervivencia)
+- **Culpa (30)**: Drena Hígado (procesamiento emocional)
+- **Ira (150)**: Drena Páncreas (control glucémico)
+
+Cuando activas:
+- **Paz (600)**: Repara Corazón (sincronizador maestro)
+- **Amor (500)**: Repara Timo (sistema inmune)
+- **Alegría (540)**: Repara Páncreas (energía metabólica)
+
+**Interpretación**: Las emociones no son "psicológicas", son **eventos biofísicos que afectan tus órganos**.
+
+### FASE 3: Gasto Energético vs Reparación
+
+**Objetivo**: Visualizar ATP (energía celular) basado en frecuencia dominante.
+
+La barra muestra:
+- **Rojo (izquierda)**: Emociones en "Fuerza" (<200) drenan ATP y generan cortisol
+- **Verde (derecha)**: Emociones en "Poder" (>500) activan reparación y mitocondrias
+
+**Fórmula**:
+```
+Si Nivel < 200: Energy Drain = 100 - (200 - Nivel) × 0.3
+Si Nivel > 200: Energy Repair = 50 + (Nivel - 200) × 0.2
+```
+
+**Lección**: Cambiar emoción = cambiar bioquímica energética instantáneamente.
+
+### FASE 4: Sonidos Binaurales (Brainwave Entrainment)
+
+**Objetivo**: Usar diferencia de frecuencias entre oídos para inducir estados cerebrales.
+
+Tres modos:
+1. **Alfa 10 Hz** (500 Hz oído izq, 510 Hz oído der): Relajación despierto
+2. **Theta 5 Hz** (440 Hz izq, 445 Hz der): Meditación profunda
+3. **Paz 7 Hz** (440 Hz izq, 447 Hz der): Equilibrio y compasión
+
+**Cómo funciona**: El cerebro "sigue" la frecuencia de diferencia, sincronizándose con ese estado.
+
+**Evidencia**: MIT, Stanford, y neurocientíficos han demostrado que tonos binaurales inducen cambios medibles en EEG.
+
+### FASE 5: Estado de Unidad (Dimensión 40)
+
+**Objetivo**: Visualizar el "colapso de función de onda" que ocurre en meditación profunda.
+
+Cuando **Coherencia ≥ 95%**:
+- Las ondas individuales (colores diferentes) desaparecen
+- Todo colapsa en una **Onda Blanca Única y Brillante**
+- Canvas cambia a efecto de sincronía global
+- Representa el estado de **"No-Dualidad"** (Dimensión 40 o "Ser Puro")
+
+**Interpretación espiritual**:
+- 0–40% Coherencia: Muchas mentes, muchas emociones (Dualidad caótica)
+- 40–80% Coherencia: Emociones en equilibrio (Dualidad armónica)
+- 80–95% Coherencia: Comenzando a "sentir unidad" (Transición)
+- 95–100% Coherencia: **UNO. Sin separación.** (Unidad absoluta = Iluminación, Hawkins 1000)
+
+---
+
+## 🎓 Cómo Usar las 5 Fases Juntas
+
+### Experimento: "Camino hacia la Iluminación" (15 minutos)
+
+1. **Abre "⚡ Avanzado"**
+2. **Activa Entrenamiento Alfa-Theta**
+3. **Abre "🧠 Emociones"** y activa progresivamente:
+   - Primero: **Miedo (100)** → Observa cómo drena
+   - Luego: **Coraje (200)** → Observa transición
+   - Luego: **Aceptación (350)** → Observa reparación
+   - Luego: **Paz (600)** → Observa meditación profunda
+   - Finalmente: **Iluminación (850)** → Observa Onda Blanca si coherencia → 95%
+4. **Activa sonido Binaurale (Paz 7 Hz)** mientras meditación
+5. **Observa el gráfico**: cuando veas onda blanca brillante, estás en Estado de Unidad
+
+### Interpretación Final
+
+Si logras una **onda resultante blanca pura y coherencia >95%**, el simulador te está mostrando que **todas las capas de tu ser están sincronizadas**:
+- Tu consciencia está en armonía
+- Tu biología vibra coherente
+- Tu energía es máxima
+- Tu sistema inmune está potenciado
+- Tu creatividad está en flow
+
+**Esto es lo que espirituales llaman "Iluminación".**
+**Esto es lo que científicos llaman "Coherencia Cardiaca Profunda".**
+**En ambos casos, es lo mismo: Sincronía Total.**
+
+---
+
+*Última actualización: Marzo 2026 (con 5 fases avanzadas)*
