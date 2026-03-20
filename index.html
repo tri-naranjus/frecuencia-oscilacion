@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Frecuencias y Consciencia</title>
+<style>
+/* ── RESET ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:#080812;
+  color:#d8d8f0;
+  font-family:'Segoe UI',system-ui,sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── HEADER ── */
+header {
+  text-align:center;
+  padding:20px 16px 10px;
+  background:linear-gradient(180deg,#0d0d22 0%,transparent 100%);
+}
+header h1 {
+  font-size:1.45rem;
+  font-weight:200;
+  letter-spacing:.35em;
+  text-transform:uppercase;
+  color:#c8b4ff;
+}
+header p { font-size:.72rem; color:#555; margin-top:3px; letter-spacing:.15em; }
+
+/* ── MAIN GRID ── */
+.layout {
+  display:grid;
+  grid-template-columns:260px 1fr 210px;
+  gap:10px;
+  padding:10px;
+  max-width:1400px;
+  margin:0 auto;
+}
+
+/* ── CARDS ── */
+.card {
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  padding:12px;
+}
+.card-title {
+  font-size:.62rem;
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  color:#666;
+  margin-bottom:10px;
+  padding-bottom:7px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+/* ── LEFT: ACTIVE WAVES ── */
+.waves-list { display:flex; flex-direction:column; gap:7px; min-height:40px; }
+
+.wave-item {
+  border-radius:8px;
+  padding:8px 10px;
+  border-left:3px solid #666;
+  background:rgba(255,255,255,.03);
+  transition:border-color .3s;
+}
+.wave-item-header {
+  display:flex; align-items:center; gap:6px; margin-bottom:6px;
+}
+.wave-item-name {
+  flex:1; font-size:.72rem; font-weight:600;
+}
+.wave-item-tag {
+  font-size:.58rem; color:#888;
+  background:rgba(255,255,255,.07);
+  padding:2px 6px; border-radius:8px;
+}
+.wave-item-btns { display:flex; gap:4px; }
+.wi-btn {
+  width:18px; height:18px; border-radius:50%;
+  border:1px solid rgba(255,255,255,.2);
+  background:transparent; color:#aaa;
+  font-size:.55rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .2s;
+}
+.wi-btn.muted { background:rgba(255,80,80,.25); border-color:#ff5050; }
+.wi-btn.del { border-color:rgba(255,80,80,.4); color:#ff8080; }
+.wi-btn.del:hover { background:rgba(255,60,60,.3); }
+
+.slider-mini {
+  display:flex; align-items:center; gap:6px;
+}
+.slider-mini span { font-size:.6rem; color:#666; width:22px; }
+.slider-mini .val { width:28px; text-align:right; color:#aaa; }
+input[type=range] {
+  flex:1; height:3px; -webkit-appearance:none;
+  background:rgba(255,255,255,.1); border-radius:2px;
+  outline:none; cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none;
+  width:11px; height:11px; border-radius:50%;
+  background:currentColor; cursor:pointer;
+}
+
+.no-waves {
+  font-size:.68rem; color:#444; text-align:center;
+  padding:12px 0; font-style:italic;
+}
+
+.global-btns {
+  display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;
+}
+.g-btn {
+  flex:1; min-width:50px;
+  padding:6px 4px; font-size:.65rem;
+  border-radius:6px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.05);
+  color:#ccc; cursor:pointer;
+  letter-spacing:.06em; transition:all .2s;
+}
+.g-btn:hover { background:rgba(255,255,255,.1); }
+.g-btn.active { background:rgba(200,180,255,.18); border-color:#c8b4ff; color:#c8b4ff; }
+
+.speed-row {
+  display:flex; align-items:center; gap:7px;
+  margin-top:8px; font-size:.62rem; color:#666;
+}
+.speed-row input { flex:1; }
+
+/* ── CENTER: CANVAS ── */
+#waveCanvas {
+  width:100%; height:280px;
+  display:block; border-radius:8px;
+  background:#04040e;
+}
+#beatCanvas {
+  width:100%; height:44px;
+  display:block; border-radius:6px;
+  background:#04040e; margin-top:6px;
+}
+.canvas-sub {
+  display:flex; justify-content:space-between;
+  font-size:.58rem; color:#444;
+  padding:3px 4px 0;
+}
+
+/* ── RIGHT: STATE ── */
+.consciousness-level { text-align:center; padding:10px 0 8px; }
+.lvl-num { font-size:2.8rem; font-weight:200; line-height:1; transition:color .8s; }
+.lvl-name { font-size:.66rem; letter-spacing:.18em; text-transform:uppercase; margin-top:3px; transition:color .8s; }
+.lvl-note { font-size:1.3rem; margin-top:3px; opacity:.7; }
+
+.coh-ring { width:80px; height:80px; margin:6px auto; position:relative; }
+.coh-ring svg { width:100%; height:100%; transform:rotate(-90deg); }
+.ring-bg { fill:none; stroke:rgba(255,255,255,.06); stroke-width:6; }
+.ring-fill { fill:none; stroke-width:6; stroke-linecap:round; transition:stroke-dasharray .4s, stroke .8s; }
+.coh-center {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center; line-height:1.2;
+}
+.coh-pct { font-size:1rem; font-weight:300; }
+.coh-sub { font-size:.52rem; color:#666; letter-spacing:.1em; text-transform:uppercase; }
+
+.ebar { margin:7px 0; }
+.ebar-lbl { display:flex; justify-content:space-between; font-size:.6rem; color:#666; margin-bottom:3px; }
+.ebar-bg { height:7px; background:rgba(255,255,255,.06); border-radius:4px; overflow:hidden; }
+.ebar-fill { height:100%; border-radius:4px; transition:width .3s, background .8s; }
+
+.interf-tag {
+  display:flex; align-items:center; gap:7px;
+  padding:7px 8px; border-radius:6px; margin:7px 0;
+  font-size:.65rem; transition:background .5s;
+}
+.i-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+.lvl-desc {
+  font-size:.64rem; color:#888; line-height:1.55;
+  font-style:italic;
+  border-left:2px solid rgba(255,255,255,.09);
+  padding-left:8px; margin-top:8px;
+}
+
+/* ── ENERGY BALANCE BAR ── */
+.balance-bar-wrap {
+  margin:8px 0;
+}
+.balance-bar-bg {
+  height:10px; border-radius:5px;
+  background:linear-gradient(90deg,#880000 0%,#ff3030 20%,#ffa020 40%,#e0e040 50%,#30d080 65%,#3090ff 80%,#c060ff 100%);
+  position:relative;
+}
+.balance-needle {
+  position:absolute; top:-3px; width:2px; height:16px;
+  background:white; border-radius:1px;
+  transform:translateX(-50%);
+  transition:left .5s;
+  box-shadow:0 0 4px white;
+}
+.balance-lbl { display:flex; justify-content:space-between; font-size:.56rem; color:#555; margin-top:3px; }
+
+/* ── PRESETS PANEL ── */
+.presets-panel {
+  max-width:1400px; margin:0 auto 12px;
+  padding:0 10px;
+}
+
+.preset-tabs {
+  display:flex; gap:6px; margin-bottom:8px;
+}
+.tab-btn {
+  padding:6px 16px; font-size:.68rem;
+  border-radius:20px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.04);
+  color:#888; cursor:pointer;
+  letter-spacing:.08em; transition:all .2s;
+}
+.tab-btn.active {
+  background:rgba(200,180,255,.15);
+  border-color:#c8b4ff; color:#c8b4ff;
+}
+
+.tab-content { display:none; }
+.tab-content.visible { display:block; }
+
+/* ── EMOTION BUTTONS ── */
+.emotion-grid {
+  display:flex; flex-wrap:wrap; gap:5px; align-items:center;
+}
+
+.inflection-marker {
+  width:100%; display:flex; align-items:center; gap:8px;
+  margin:4px 0; font-size:.6rem; color:#ffa020;
+  letter-spacing:.1em;
+}
+.inflection-marker::before, .inflection-marker::after {
+  content:''; flex:1; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,160,30,.4),transparent);
+}
+
+.preset-btn {
+  display:flex; align-items:center; gap:5px;
+  padding:5px 10px; border-radius:20px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  color:#bbb; cursor:pointer; font-size:.65rem;
+  transition:all .25s; white-space:nowrap;
+  user-select:none;
+}
+.preset-btn:hover { background:rgba(255,255,255,.09); color:#eee; }
+.preset-btn.active {
+  color:#fff; font-weight:600;
+}
+.preset-btn .pb-icon { font-size:.9rem; }
+.preset-btn .pb-name { }
+.preset-btn .pb-val {
+  font-size:.58rem; opacity:.7; margin-left:2px;
+}
+
+/* Emotion categories */
+.preset-btn.above { border-color:rgba(150,120,255,.3); }
+.preset-btn.above.active {
+  box-shadow:0 0 8px var(--c), 0 0 2px var(--c);
+  border-color:var(--c);
+  background:rgba(150,120,255,.15);
+}
+.preset-btn.below { border-color:rgba(255,80,80,.25); }
+.preset-btn.below.active {
+  box-shadow:0 0 8px var(--c), 0 0 2px var(--c);
+  border-color:var(--c);
+  background:rgba(255,60,60,.15);
+}
+.preset-btn.inflect { border-color:rgba(255,160,30,.4); }
+.preset-btn.inflect.active {
+  box-shadow:0 0 8px #ffa020;
+  border-color:#ffa020;
+  background:rgba(255,160,30,.15);
+}
+
+/* Organ categories */
+.preset-btn.org-optimo { border-color:rgba(0,255,200,.3); }
+.preset-btn.org-optimo.active { background:rgba(0,255,200,.12); border-color:var(--c); box-shadow:0 0 8px var(--c); }
+.preset-btn.org-sano { border-color:rgba(80,220,120,.3); }
+.preset-btn.org-sano.active { background:rgba(80,220,120,.12); border-color:var(--c); box-shadow:0 0 8px var(--c); }
+.preset-btn.org-borderline { border-color:rgba(220,220,60,.3); }
+.preset-btn.org-borderline.active { background:rgba(220,220,60,.12); border-color:var(--c); box-shadow:0 0 8px var(--c); }
+.preset-btn.org-riesgo { border-color:rgba(255,140,40,.3); }
+.preset-btn.org-riesgo.active { background:rgba(255,140,40,.12); border-color:var(--c); box-shadow:0 0 8px var(--c); }
+.preset-btn.org-enfermedad { border-color:rgba(255,80,40,.3); }
+.preset-btn.org-enfermedad.active { background:rgba(255,80,40,.12); border-color:var(--c); box-shadow:0 0 8px var(--c); }
+.preset-btn.org-critico { border-color:rgba(180,20,20,.5); }
+.preset-btn.org-critico.active { background:rgba(180,20,20,.2); border-color:var(--c); box-shadow:0 0 8px var(--c); }
+
+/* organ separators */
+.org-sep {
+  font-size:.58rem; letter-spacing:.12em; text-transform:uppercase;
+  padding:4px 8px; border-radius:10px;
+  background:rgba(255,255,255,.05);
+  color:#666; flex-shrink:0;
+}
+
+/* ── DIMS ── */
+.dims-grid { display:grid; grid-template-columns:repeat(10,1fr); gap:3px; }
+.dim-cell {
+  height:24px; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.52rem; color:rgba(255,255,255,.3);
+  transition:all .5s; position:relative; cursor:default;
+}
+.dim-cell:hover .dim-tip { display:block; }
+.dim-tip {
+  display:none; position:absolute; bottom:110%; left:50%;
+  transform:translateX(-50%);
+  background:#16162a; border:1px solid rgba(255,255,255,.15);
+  border-radius:6px; padding:5px 8px;
+  font-size:.58rem; color:#ccc; white-space:nowrap; z-index:20;
+}
+
+/* ── CANVAS LEGEND ── */
+.wave-legend {
+  display:flex; flex-wrap:wrap; gap:8px; margin-top:5px;
+  padding:0 2px;
+}
+.wl-item { display:flex; align-items:center; gap:4px; font-size:.6rem; color:#888; }
+.wl-dot { width:8px; height:3px; border-radius:2px; }
+
+@media(max-width:900px) {
+  .layout { grid-template-columns:1fr 1fr; }
+  .panel-waves { grid-column:1; }
+  .panel-canvas { grid-column:1/3; grid-row:2; }
+  .panel-energy { grid-column:2; }
+}
+@media(max-width:580px) {
+  .layout { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Simulador · Frecuencias &amp; Consciencia</h1>
+  <p>Activa emociones y órganos · observa la interferencia · siente la vibración</p>
+</header>
+
+<div class="layout">
+
+  <!-- ══ IZQUIERDA: ONDAS ACTIVAS ══ -->
+  <div class="card panel-waves">
+    <div class="card-title">Ondas activas</div>
+    <div class="waves-list" id="wavesList">
+      <div class="no-waves">Activa emociones u órganos abajo ↓</div>
+    </div>
+
+    <div class="global-btns">
+      <button class="g-btn active" id="btnPlay">▶ Play</button>
+      <button class="g-btn" id="btnSound">♪ Sonido</button>
+      <button class="g-btn" id="btnClear">✕ Limpiar</button>
+    </div>
+
+    <div class="speed-row">
+      <span>Vel.</span>
+      <input type="range" id="speedSlider" min=".1" max="4" step=".05" value="1">
+      <span id="speedVal" style="width:28px;text-align:right">1×</span>
+    </div>
+  </div>
+
+  <!-- ══ CENTRO: CANVAS ══ -->
+  <div class="card panel-canvas">
+    <div class="card-title">Visualizador de interferencia</div>
+    <canvas id="waveCanvas"></canvas>
+    <canvas id="beatCanvas"></canvas>
+    <div class="canvas-sub">
+      <span>← baja frecuencia</span>
+      <span id="beatLabel">Patrón de interferencia (beatmap)</span>
+      <span>alta frecuencia →</span>
+    </div>
+    <div class="wave-legend" id="waveLegend"></div>
+  </div>
+
+  <!-- ══ DERECHA: ESTADO ══ -->
+  <div class="card panel-energy">
+    <div class="card-title">Estado del sistema</div>
+
+    <div class="consciousness-level">
+      <div class="lvl-num" id="lvlNum">—</div>
+      <div class="lvl-name" id="lvlName">Sin ondas</div>
+      <div class="lvl-note" id="lvlNote">·</div>
+    </div>
+
+    <div class="coh-ring">
+      <svg viewBox="0 0 80 80">
+        <circle class="ring-bg" cx="40" cy="40" r="32"/>
+        <circle class="ring-fill" id="cohRing" cx="40" cy="40" r="32"
+          stroke-dasharray="0 201" stroke="#ff4040"/>
+      </svg>
+      <div class="coh-center">
+        <div class="coh-pct" id="cohPct">—</div>
+        <div class="coh-sub">Coherencia</div>
+      </div>
+    </div>
+
+    <div class="ebar">
+      <div class="ebar-lbl"><span>Energía total</span><span id="eVal">—</span></div>
+      <div class="ebar-bg"><div class="ebar-fill" id="eBar" style="width:0%"></div></div>
+    </div>
+
+    <!-- Balance poder/fuerza -->
+    <div class="balance-bar-wrap">
+      <div class="ebar-lbl"><span>Fuerza ⟷ Poder</span><span id="balLabel">—</span></div>
+      <div class="balance-bar-bg">
+        <div class="balance-needle" id="balNeedle" style="left:50%"></div>
+      </div>
+      <div class="balance-lbl"><span>Fuerza (drena)</span><span>Poder (da)</span></div>
+    </div>
+
+    <div class="interf-tag" id="interfTag">
+      <div class="i-dot" id="interfDot"></div>
+      <span id="interfTxt">—</span>
+    </div>
+
+    <div class="lvl-desc" id="lvlDesc">Activa ondas para ver el estado resultante.</div>
+  </div>
+
+</div><!-- /layout -->
+
+<!-- ══ PRESETS ══ -->
+<div class="presets-panel">
+  <div class="preset-tabs">
+    <button class="tab-btn active" data-tab="emotions">🧠 Emociones (Hawkins)</button>
+    <button class="tab-btn" data-tab="organs">🫁 Órganos (MHz)</button>
+    <button class="tab-btn" data-tab="dims">🌐 Dimensiones</button>
+  </div>
+
+  <!-- EMOTIONS TAB -->
+  <div class="tab-content card visible" id="tab-emotions">
+    <div class="emotion-grid" id="emotionGrid"></div>
+  </div>
+
+  <!-- ORGANS TAB -->
+  <div class="tab-content card" id="tab-organs">
+    <div class="emotion-grid" id="organGrid"></div>
+  </div>
+
+  <!-- DIMS TAB -->
+  <div class="tab-content card" id="tab-dims">
+    <div class="card-title">Mapa dimensional · 40 dimensiones · (la frecuencia activa ilumina las dimensiones correspondientes)</div>
+    <div class="dims-grid" id="dimsGrid"></div>
+    <div style="display:flex;gap:12px;margin-top:7px;flex-wrap:wrap;font-size:.58rem;color:#555">
+      <span>🔴 Físico 1–3</span>
+      <span>🟡 Mental 4–9</span>
+      <span>🔵 Espiritual 10–18</span>
+      <span>⚪ Elevado 19–39</span>
+      <span>✨ Absoluto 40</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  DATOS
+// ════════════════════════════════════════════════════════════
+
+const LEVELS = [
+  { n:1, name:'Naturaleza · Instinto',    note:'DO', color:'#ff3030', freqRange:[1,2] },
+  { n:2, name:'Armonía · Emocional',      note:'RE', color:'#ff8020', freqRange:[2,3] },
+  { n:3, name:'Correspondencia · Sentimental', note:'MI', color:'#ffe020', freqRange:[3,4] },
+  { n:4, name:'Evolución · Intelectual',  note:'FA', color:'#30d060', freqRange:[4,5] },
+  { n:5, name:'Polaridad · Comprensivo',  note:'SOL', color:'#3090ff', freqRange:[5,6] },
+  { n:6, name:'Manifestación · Intuitivo',note:'LA', color:'#4040ff', freqRange:[6,7] },
+  { n:7, name:'Amor · Absoluto',          note:'SI', color:'#c060ff', freqRange:[7,8] },
+];
+
+const EMOTIONS = [
+  // ABOVE 200 — POWER (dan energía)
+  { name:'Iluminación', level:850, icon:'✨', cat:'above' },
+  { name:'Paz',         level:600, icon:'☮️',  cat:'above' },
+  { name:'Alegría',     level:540, icon:'🌟', cat:'above' },
+  { name:'Amor',        level:500, icon:'💜', cat:'above' },
+  { name:'Razón',       level:400, icon:'🧠', cat:'above' },
+  { name:'Aceptación',  level:350, icon:'🤝', cat:'above' },
+  { name:'Voluntad',    level:310, icon:'🌱', cat:'above' },
+  { name:'Neutralidad', level:250, icon:'⚖️', cat:'above' },
+  // INFLECTION —————————————————
+  { name:'Coraje',      level:200, icon:'🔥', cat:'inflect' },
+  // BELOW 200 — FORCE (drenan energía)
+  { name:'Orgullo',     level:175, icon:'👑', cat:'below' },
+  { name:'Ira',         level:150, icon:'😡', cat:'below' },
+  { name:'Deseo',       level:125, icon:'🌀', cat:'below' },
+  { name:'Miedo',       level:100, icon:'😨', cat:'below' },
+  { name:'Sufrimiento', level: 75, icon:'😢', cat:'below' },
+  { name:'Apatía',      level: 50, icon:'😶', cat:'below' },
+  { name:'Culpa',       level: 30, icon:'😔', cat:'below' },
+  { name:'Vergüenza',   level: 20, icon:'🌑', cat:'below' },
+];
+
+const ORGANS = [
+  // Óptimo
+  { name:'Cerebro Genio', mhz:81,   icon:'🧠', cat:'optimo',      range:'80–82' },
+  // Sano
+  { name:'Páncreas',      mhz:70,   icon:'⚡', cat:'sano',        range:'60–80' },
+  { name:'Corazón',       mhz:68.5, icon:'❤️', cat:'sano',        range:'67–70' },
+  { name:'Timo',          mhz:66.5, icon:'🛡️', cat:'sano',        range:'65–68' },
+  { name:'Tiroides',      mhz:65,   icon:'🦋', cat:'sano',        range:'62–68' },
+  { name:'Cuerpo Sano',   mhz:65,   icon:'💪', cat:'sano',        range:'62–68' },
+  { name:'Hígado',        mhz:60,   icon:'🫒', cat:'sano',        range:'55–65' },
+  { name:'Pulmones',      mhz:61.5, icon:'🫁', cat:'sano',        range:'58–65' },
+  { name:'Estómago',      mhz:61.5, icon:'🌿', cat:'sano',        range:'58–65' },
+  // Borderline
+  { name:'Colon ↓',       mhz:60.5, icon:'↓', cat:'borderline',  range:'58–63' },
+  { name:'Colon ↑',       mhz:59,   icon:'↑', cat:'borderline',  range:'58–60' },
+  // Riesgo
+  { name:'Inicio Enf.',   mhz:59.5, icon:'⚠️', cat:'riesgo',      range:'59–60' },
+  // Enfermedad
+  { name:'Influenza',     mhz:58,   icon:'🤧', cat:'enfermedad',  range:'58' },
+  { name:'Inf. Viral',    mhz:55,   icon:'🦠', cat:'enfermedad',  range:'55' },
+  { name:'Epstein Barr',  mhz:52,   icon:'🧬', cat:'enfermedad',  range:'52' },
+  // Crítico
+  { name:'Deterioro',     mhz:48,   icon:'📉', cat:'critico',     range:'48' },
+  { name:'Cáncer',        mhz:42,   icon:'☣️', cat:'critico',     range:'42' },
+  { name:'Inicio Muerte', mhz:20,   icon:'💀', cat:'critico',     range:'20' },
+];
+
+const DIM_ZONES = [
+  { range:[1,3],   color:'rgba(255,60,60,.5)',    label:'Físico',     desc:'Cuerpo y cerebro.' },
+  { range:[4,9],   color:'rgba(255,220,60,.4)',   label:'Mental',     desc:'Ego · Personalidad.' },
+  { range:[10,18], color:'rgba(60,144,255,.4)',   label:'Espiritual', desc:'Consciencia inmortal.' },
+  { range:[19,39], color:'rgba(180,180,255,.25)', label:'Elevado',    desc:'Campos de alta información.' },
+  { range:[40,40], color:'rgba(255,255,255,.8)',  label:'Absoluto',   desc:'La chispa divina.' },
+];
+
+// ════════════════════════════════════════════════════════════
+//  HELPERS DE CONVERSIÓN
+// ════════════════════════════════════════════════════════════
+
+function emotionToVFreq(level) {
+  const t = (Math.log10(level) - Math.log10(20)) / (Math.log10(1000) - Math.log10(20));
+  return 0.5 + t * 7;
+}
+function organToVFreq(mhz) {
+  return 0.5 + (mhz - 20) / (82 - 20) * 7;
+}
+function emotionToAmp(level) {
+  const t = (Math.log10(level) - Math.log10(20)) / (Math.log10(1000) - Math.log10(20));
+  return Math.max(0.08, 0.08 + t * 0.85);
+}
+function organToAmp(mhz) {
+  return 0.2 + (mhz - 20) / (82 - 20) * 0.7;
+}
+function getEmotionColor(level) {
+  if (level >= 700) return '#ffffff';
+  if (level >= 540) return '#e8d0ff';
+  if (level >= 500) return '#c060ff';
+  if (level >= 400) return '#5050ff';
+  if (level >= 350) return '#3090ff';
+  if (level >= 310) return '#30cc80';
+  if (level >= 250) return '#d0d040';
+  if (level >= 200) return '#ffa030';
+  if (level >= 150) return '#ff6020';
+  if (level >= 100) return '#ff3030';
+  if (level >= 50)  return '#cc1010';
+  return '#880808';
+}
+function getOrganColor(mhz) {
+  if (mhz >= 70) return '#00ffcc';
+  if (mhz >= 65) return '#30d080';
+  if (mhz >= 60) return '#80e040';
+  if (mhz >= 58) return '#d0d040';
+  if (mhz >= 52) return '#ff8020';
+  if (mhz >= 42) return '#ff3030';
+  return '#880000';
+}
+function emotionToLevel(level) {
+  const t = (Math.log10(level) - Math.log10(20)) / (Math.log10(1000) - Math.log10(20));
+  return Math.round(t * 6);
+}
+function organToLevel(mhz) {
+  return Math.round((mhz - 20) / (82 - 20) * 6);
+}
+
+// ════════════════════════════════════════════════════════════
+//  ESTADO
+// ════════════════════════════════════════════════════════════
+
+let waves = [];
+let waveIdCounter = 0;
+let playing = true;
+let soundEnabled = false;
+let speed = 1;
+let time = 0;
+let animFrame;
+let lastTs = null;
+let audioCtx = null;
+let oscillators = {};
+
+// track which presets are active
+const activePresets = { emotions: new Set(), organs: new Set() };
+
+// ════════════════════════════════════════════════════════════
+//  CANVAS SETUP
+// ════════════════════════════════════════════════════════════
+
+const wCvs = document.getElementById('waveCanvas');
+const wCtx = wCvs.getContext('2d');
+const bCvs = document.getElementById('beatCanvas');
+const bCtx = bCvs.getContext('2d');
+
+function resizeCanvases() {
+  const W = wCvs.parentElement.clientWidth;
+  wCvs.width = W; wCvs.height = 280;
+  bCvs.width = W; bCvs.height = 44;
+}
+window.addEventListener('resize', resizeCanvases);
+resizeCanvases();
+
+// ════════════════════════════════════════════════════════════
+//  WAVE ENGINE
+// ════════════════════════════════════════════════════════════
+
+function waveY(w, x, t, W) {
+  if (w.muted) return 0;
+  const phase = (w.phase || 0) * Math.PI * 2;
+  return w.amp * Math.sin(2 * Math.PI * w.freq * (x / W) + t * w.freq * 2 + phase);
+}
+
+function resultantAt(x, t, W) {
+  if (waves.length === 0) return 0;
+  return waves.reduce((s, w) => s + waveY(w, x, t, W), 0) / Math.max(waves.length, 1);
+}
+
+// ════════════════════════════════════════════════════════════
+//  DRAW
+// ════════════════════════════════════════════════════════════
+
+function drawWaves() {
+  const W = wCvs.width, H = wCvs.height;
+  const mid = H / 2, scale = H * 0.37;
+
+  wCtx.clearRect(0, 0, W, H);
+  wCtx.fillStyle = '#04040e';
+  wCtx.fillRect(0, 0, W, H);
+
+  // center line
+  wCtx.strokeStyle = 'rgba(255,255,255,.05)';
+  wCtx.lineWidth = 1;
+  wCtx.beginPath(); wCtx.moveTo(0, mid); wCtx.lineTo(W, mid); wCtx.stroke();
+
+  if (waves.length === 0) {
+    wCtx.fillStyle = 'rgba(255,255,255,.12)';
+    wCtx.font = '13px Segoe UI';
+    wCtx.textAlign = 'center';
+    wCtx.fillText('Activa una emoción u órgano para ver su onda', W/2, mid);
+    return;
+  }
+
+  // individual waves
+  waves.forEach(w => {
+    if (w.muted) return;
+    wCtx.beginPath();
+    wCtx.strokeStyle = w.color + '70';
+    wCtx.lineWidth = 1.5;
+    for (let x = 0; x < W; x++) {
+      const y = mid + waveY(w, x, time, W) * scale;
+      x === 0 ? wCtx.moveTo(x, y) : wCtx.lineTo(x, y);
+    }
+    wCtx.stroke();
+  });
+
+  // interference zones (constructive = bright fill)
+  const steps = Math.min(W, 500);
+  const dx = W / steps;
+  for (let i = 0; i < steps; i++) {
+    const r = resultantAt(i * dx, time, W);
+    if (Math.abs(r) > 0.55) {
+      const alpha = (Math.abs(r) - 0.55) * 0.12;
+      const col = r > 0 ? `rgba(200,220,255,${alpha})` : `rgba(255,180,180,${alpha})`;
+      wCtx.fillStyle = col;
+      wCtx.fillRect(i * dx, 0, dx + 1, H);
+    }
+  }
+
+  // resultant wave
+  const rColor = getResultantColor();
+  wCtx.shadowColor = rColor;
+  wCtx.shadowBlur = 10;
+  wCtx.beginPath();
+  wCtx.strokeStyle = rColor;
+  wCtx.lineWidth = 2.5;
+  for (let x = 0; x < W; x++) {
+    const y = mid + resultantAt(x, time, W) * scale;
+    x === 0 ? wCtx.moveTo(x, y) : wCtx.lineTo(x, y);
+  }
+  wCtx.stroke();
+  wCtx.shadowBlur = 0;
+}
+
+function drawBeat() {
+  const W = bCvs.width, H = bCvs.height;
+  bCtx.clearRect(0, 0, W, H);
+  bCtx.fillStyle = '#04040e';
+  bCtx.fillRect(0, 0, W, H);
+
+  const active = waves.filter(w => !w.muted);
+  if (active.length === 0) return;
+
+  // center line
+  bCtx.strokeStyle = 'rgba(255,255,255,.06)';
+  bCtx.lineWidth = 1;
+  bCtx.beginPath(); bCtx.moveTo(0, H/2); bCtx.lineTo(W, H/2); bCtx.stroke();
+
+  bCtx.beginPath();
+  bCtx.strokeStyle = getResultantColor() + 'bb';
+  bCtx.lineWidth = 1.5;
+  for (let x = 0; x < W; x++) {
+    const y = H/2 - resultantAt(x, time, W) * (H * 0.4);
+    x === 0 ? bCtx.moveTo(x, y) : bCtx.lineTo(x, y);
+  }
+  bCtx.stroke();
+}
+
+function getResultantColor() {
+  const active = waves.filter(w => !w.muted);
+  if (active.length === 0) return '#444';
+  if (active.length === 1) return active[0].color;
+  // weighted average hue by amplitude
+  let totalAmp = active.reduce((s, w) => s + w.amp, 0);
+  // use level-based color mixing
+  const avgLevel = active.reduce((s, w) => s + (w.levelIdx || 0) * w.amp, 0) / totalAmp;
+  return levelToColor(avgLevel);
+}
+
+function levelToColor(lvlFloat) {
+  const hues = [0, 28, 52, 138, 210, 240, 280];
+  const idx = Math.max(0, Math.min(5, Math.floor(lvlFloat)));
+  const frac = lvlFloat - idx;
+  const h = hues[idx] + (hues[idx+1] - hues[idx]) * frac;
+  return `hsl(${h},80%,62%)`;
+}
+
+// ════════════════════════════════════════════════════════════
+//  LEGEND
+// ════════════════════════════════════════════════════════════
+
+function updateLegend() {
+  const el = document.getElementById('waveLegend');
+  el.innerHTML = '';
+  waves.forEach(w => {
+    const item = document.createElement('div');
+    item.className = 'wl-item';
+    item.innerHTML = `<div class="wl-dot" style="background:${w.color}"></div><span>${w.label}</span>`;
+    el.appendChild(item);
+  });
+  if (waves.length > 0) {
+    const res = document.createElement('div');
+    res.className = 'wl-item';
+    res.innerHTML = `<div class="wl-dot" style="background:${getResultantColor()};height:4px"></div><span style="color:#ccc;font-weight:600">Resultante</span>`;
+    el.appendChild(res);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  ADD / REMOVE WAVES
+// ════════════════════════════════════════════════════════════
+
+function addWave({ freq, amp, phase=0, color, label, levelIdx, presetKey }) {
+  const id = waveIdCounter++;
+  waves.push({ id, freq, amp, phase, color, label, levelIdx: levelIdx||0, muted:false, presetKey });
+  renderActiveWaves();
+  updateLegend();
+  updateOscillators();
+}
+
+function removeWave(id) {
+  const w = waves.find(x => x.id === id);
+  if (w && w.presetKey) {
+    const [type, idx] = w.presetKey.split('_');
+    if (type === 'e') activePresets.emotions.delete(+idx);
+    if (type === 'o') activePresets.organs.delete(+idx);
+    updatePresetButtonStates();
+  }
+  stopOscillator(id);
+  waves = waves.filter(x => x.id !== id);
+  renderActiveWaves();
+  updateLegend();
+}
+
+function togglePreset(type, index) {
+  const set = type === 'e' ? activePresets.emotions : activePresets.organs;
+  const key = `${type}_${index}`;
+
+  if (set.has(index)) {
+    // remove
+    set.delete(index);
+    const w = waves.find(x => x.presetKey === key);
+    if (w) {
+      stopOscillator(w.id);
+      waves = waves.filter(x => x.presetKey !== key);
+    }
+  } else {
+    // add
+    set.add(index);
+    let wave;
+    if (type === 'e') {
+      const e = EMOTIONS[index];
+      wave = {
+        freq: emotionToVFreq(e.level),
+        amp: emotionToAmp(e.level),
+        color: getEmotionColor(e.level),
+        label: `${e.icon} ${e.name} (${e.level})`,
+        levelIdx: emotionToLevel(e.level),
+        presetKey: key,
+      };
+    } else {
+      const o = ORGANS[index];
+      wave = {
+        freq: organToVFreq(o.mhz),
+        amp: organToAmp(o.mhz),
+        color: getOrganColor(o.mhz),
+        label: `${o.icon} ${o.name} (${o.mhz} MHz)`,
+        levelIdx: organToLevel(o.mhz),
+        presetKey: key,
+      };
+    }
+    addWave(wave);
+  }
+  updatePresetButtonStates();
+  renderActiveWaves();
+  updateLegend();
+}
+
+// ════════════════════════════════════════════════════════════
+//  RENDER ACTIVE WAVES
+// ════════════════════════════════════════════════════════════
+
+function renderActiveWaves() {
+  const el = document.getElementById('wavesList');
+  if (waves.length === 0) {
+    el.innerHTML = '<div class="no-waves">Activa emociones u órganos ↓</div>';
+    return;
+  }
+  el.innerHTML = '';
+  waves.forEach(w => {
+    const div = document.createElement('div');
+    div.className = 'wave-item';
+    div.style.borderLeftColor = w.color;
+    div.innerHTML = `
+      <div class="wave-item-header">
+        <span class="wave-item-name" style="color:${w.color}">${w.label}</span>
+        <div class="wave-item-btns">
+          <button class="wi-btn ${w.muted?'muted':''}" data-mute="${w.id}" title="Silenciar">M</button>
+          <button class="wi-btn del" data-del="${w.id}" title="Quitar">✕</button>
+        </div>
+      </div>
+      <div class="slider-mini">
+        <span>Amp</span>
+        <input type="range" min=".05" max="1" step=".05" value="${w.amp}"
+          data-amp="${w.id}" style="color:${w.color}">
+        <span class="val" data-av="${w.id}">${(w.amp*100).toFixed(0)}%</span>
+      </div>`;
+    el.appendChild(div);
+  });
+
+  el.querySelectorAll('[data-mute]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const w = waves.find(x => x.id == btn.dataset.mute);
+      if (w) { w.muted = !w.muted; renderActiveWaves(); updateOscillators(); }
+    });
+  });
+  el.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', () => removeWave(+btn.dataset.del));
+  });
+  el.querySelectorAll('[data-amp]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const w = waves.find(x => x.id == inp.dataset.amp);
+      if (w) {
+        w.amp = parseFloat(inp.value);
+        const v = el.querySelector(`[data-av="${w.id}"]`);
+        if (v) v.textContent = (w.amp*100).toFixed(0)+'%';
+        updateOscillators();
+      }
+    });
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  BUILD PRESET BUTTONS
+// ════════════════════════════════════════════════════════════
+
+function buildEmotionGrid() {
+  const grid = document.getElementById('emotionGrid');
+  grid.innerHTML = '';
+
+  let seenInflect = false;
+  EMOTIONS.forEach((e, i) => {
+    if (!seenInflect && e.level <= 200 && e.cat !== 'inflect') {
+      // insert inflection marker
+      seenInflect = true;
+      const marker = document.createElement('div');
+      marker.className = 'inflection-marker';
+      marker.textContent = '⚡ PUNTO DE INFLEXIÓN · 200 · Por encima: PODER (da energía) · Por debajo: FUERZA (drena energía)';
+      grid.appendChild(marker);
+    }
+
+    const btn = document.createElement('button');
+    btn.className = `preset-btn ${e.cat}`;
+    btn.dataset.type = 'e';
+    btn.dataset.idx = i;
+    const c = getEmotionColor(e.level);
+    btn.style.setProperty('--c', c);
+    btn.innerHTML = `<span class="pb-icon">${e.icon}</span><span class="pb-name">${e.name}</span><span class="pb-val">${e.level}</span>`;
+    btn.addEventListener('click', () => togglePreset('e', i));
+    grid.appendChild(btn);
+  });
+}
+
+function buildOrganGrid() {
+  const grid = document.getElementById('organGrid');
+  grid.innerHTML = '';
+
+  const catLabels = {
+    optimo:     { label:'✨ Óptimo', cls:'org-optimo' },
+    sano:       { label:'💚 Sano',   cls:'org-sano' },
+    borderline: { label:'⚠️ Límite',cls:'org-borderline' },
+    riesgo:     { label:'🟠 Riesgo', cls:'org-riesgo' },
+    enfermedad: { label:'🔴 Enfermedad', cls:'org-enfermedad' },
+    critico:    { label:'☠️ Crítico',cls:'org-critico' },
+  };
+
+  let currentCat = null;
+  ORGANS.forEach((o, i) => {
+    if (o.cat !== currentCat) {
+      currentCat = o.cat;
+      const sep = document.createElement('span');
+      sep.className = 'org-sep';
+      sep.textContent = catLabels[o.cat]?.label || o.cat;
+      grid.appendChild(sep);
+    }
+
+    const btn = document.createElement('button');
+    const catClass = catLabels[o.cat]?.cls || '';
+    btn.className = `preset-btn ${catClass}`;
+    btn.dataset.type = 'o';
+    btn.dataset.idx = i;
+    const c = getOrganColor(o.mhz);
+    btn.style.setProperty('--c', c);
+    btn.innerHTML = `<span class="pb-icon">${o.icon}</span><span class="pb-name">${o.name}</span><span class="pb-val">${o.range} MHz</span>`;
+    btn.addEventListener('click', () => togglePreset('o', i));
+    grid.appendChild(btn);
+  });
+}
+
+function updatePresetButtonStates() {
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    const type = btn.dataset.type;
+    const idx  = +btn.dataset.idx;
+    const set  = type === 'e' ? activePresets.emotions : activePresets.organs;
+    btn.classList.toggle('active', set.has(idx));
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  STATE / UI
+// ════════════════════════════════════════════════════════════
+
+function computeState() {
+  const active = waves.filter(w => !w.muted);
+  if (active.length === 0) return null;
+
+  const dominant = active.reduce((a,b) => a.amp>b.amp ? a : b);
+  const totalEnergy = active.reduce((s,w) => s + w.amp*w.amp, 0);
+  const energyPct = Math.min(100, (totalEnergy / active.length) * 100);
+
+  let coherence = 100;
+  if (active.length > 1) {
+    const freqs = active.map(w => w.freq);
+    const avg = freqs.reduce((a,b)=>a+b,0)/freqs.length;
+    const std = Math.sqrt(freqs.reduce((s,f)=>s+(f-avg)**2,0)/freqs.length);
+    coherence = Math.max(0, Math.min(100, 100 - std * 18));
+  }
+
+  // interference type from phase spread
+  let interfType = 'constructiva';
+  if (active.length > 1) {
+    const phases = active.map(w => w.phase||0);
+    const maxDiff = Math.max(...phases) - Math.min(...phases);
+    if (maxDiff > 0.4) interfType = 'destructiva';
+    else if (maxDiff > 0.1) interfType = 'mixta';
+  }
+
+  // balance (0=force, 1=power) based on dominant freq
+  // vFreq 0.5=low(force) → 7.5=high(power)
+  const balance = Math.min(1, Math.max(0, (dominant.freq - 0.5) / 7));
+
+  // effective level
+  const levelIdx = Math.min(6, Math.max(0, dominant.levelIdx));
+
+  // dimension
+  const dimMaps = [2, 6, 8, 13, 15, 17, 40];
+  const activeDim = dimMaps[levelIdx];
+
+  return { dominant, totalEnergy, energyPct, coherence, interfType, balance, levelIdx, activeDim };
+}
+
+function updateUI() {
+  const state = computeState();
+  if (!state) {
+    document.getElementById('lvlNum').textContent = '—';
+    document.getElementById('lvlName').textContent = 'Sin ondas';
+    document.getElementById('lvlNote').textContent = '·';
+    document.getElementById('cohPct').textContent = '—';
+    document.getElementById('eVal').textContent = '—';
+    document.getElementById('interfTxt').textContent = '—';
+    document.getElementById('balLabel').textContent = '—';
+    document.getElementById('lvlDesc').textContent = 'Activa ondas para ver el estado resultante.';
+    updateDims(0);
+    return;
+  }
+
+  const lvl = LEVELS[state.levelIdx];
+  document.getElementById('lvlNum').textContent = lvl.n;
+  document.getElementById('lvlNum').style.color = lvl.color;
+  document.getElementById('lvlName').textContent = lvl.name;
+  document.getElementById('lvlName').style.color = lvl.color;
+  document.getElementById('lvlNote').textContent = lvl.note;
+
+  // coherence ring
+  const circ = 2 * Math.PI * 32;
+  const filled = (state.coherence / 100) * circ;
+  const ring = document.getElementById('cohRing');
+  ring.setAttribute('stroke-dasharray', `${filled} ${circ}`);
+  ring.setAttribute('stroke', lvl.color);
+  document.getElementById('cohPct').textContent = state.coherence.toFixed(0)+'%';
+
+  // energy
+  document.getElementById('eVal').textContent = state.energyPct.toFixed(0)+'%';
+  const ebar = document.getElementById('eBar');
+  ebar.style.width = state.energyPct+'%';
+  ebar.style.background = lvl.color;
+
+  // balance needle
+  const pct = state.balance * 100;
+  document.getElementById('balNeedle').style.left = pct+'%';
+  document.getElementById('balLabel').textContent =
+    pct < 40 ? 'Zona de Fuerza (drena)' : pct > 60 ? 'Zona de Poder (da)' : 'Umbral';
+
+  // interference
+  const tag = document.getElementById('interfTag');
+  const dot = document.getElementById('interfDot');
+  const txt = document.getElementById('interfTxt');
+  if (state.interfType === 'constructiva') {
+    tag.style.background = 'rgba(60,255,100,.07)';
+    dot.style.background = '#30ff70';
+    txt.textContent = 'Interferencia constructiva · las ondas se amplifican';
+  } else if (state.interfType === 'destructiva') {
+    tag.style.background = 'rgba(255,60,60,.07)';
+    dot.style.background = '#ff3030';
+    txt.textContent = 'Interferencia destructiva · las ondas se anulan';
+  } else {
+    tag.style.background = 'rgba(255,200,40,.07)';
+    dot.style.background = '#ffcc30';
+    txt.textContent = 'Interferencia mixta · patrón de batido';
+  }
+
+  // description
+  const descs = [
+    'Vibración primitiva. Supervivencia. La onda pesada arrastra todo hacia abajo.',
+    'Reacciones emocionales. La ley del más fuerte domina el patrón.',
+    'Ego y sufrimiento sentimental. La onda oscila entre la identidad y el dolor.',
+    'Cooperación e intelecto. El patrón empieza a organizarse constructivamente.',
+    'Unificación armónica. Las ondas cortas crean patrones bellos y estables.',
+    'Sintonía con las leyes del universo. La onda puede moldear la materia.',
+    '∞ Amor sin límites. La onda se dilata hasta confundirse con el todo.',
+  ];
+  document.getElementById('lvlDesc').textContent = descs[state.levelIdx];
+
+  // beat label
+  if (waves.length === 2) {
+    const bf = Math.abs(waves[0].freq - waves[1].freq).toFixed(2);
+    document.getElementById('beatLabel').textContent = `Frecuencia de batido: ${bf} Hz`;
+  } else {
+    document.getElementById('beatLabel').textContent = 'Patrón de interferencia (beatmap)';
+  }
+
+  updateDims(state.activeDim);
+}
+
+// ════════════════════════════════════════════════════════════
+//  DIMENSIONS
+// ════════════════════════════════════════════════════════════
+
+function buildDimsGrid() {
+  const grid = document.getElementById('dimsGrid');
+  grid.innerHTML = '';
+  for (let d = 1; d <= 40; d++) {
+    const zone = DIM_ZONES.find(z => d >= z.range[0] && d <= z.range[1]);
+    const cell = document.createElement('div');
+    cell.className = 'dim-cell';
+    cell.id = `dim-${d}`;
+    cell.innerHTML = `<span>${d}</span><div class="dim-tip">${d===40?'✨ Absoluto':zone?`${zone.label}·${zone.desc}`:`Dim ${d}`}</div>`;
+    grid.appendChild(cell);
+  }
+}
+
+function updateDims(activeDim) {
+  for (let d = 1; d <= 40; d++) {
+    const cell = document.getElementById(`dim-${d}`);
+    if (!cell) continue;
+    const zone = DIM_ZONES.find(z => d >= z.range[0] && d <= z.range[1]);
+    const lit = d <= activeDim;
+    if (lit) {
+      const alpha = d === activeDim ? 0.7 : 0.35;
+      cell.style.background = zone ? zone.color.replace(/[\d.]+\)$/, `${alpha})`) : `rgba(255,255,255,${alpha})`;
+      cell.style.color = d === activeDim ? 'white' : 'rgba(255,255,255,.6)';
+      cell.style.boxShadow = d === activeDim ? `0 0 7px ${zone?.color||'white'}` : 'none';
+    } else {
+      cell.style.background = 'rgba(255,255,255,.03)';
+      cell.style.color = 'rgba(255,255,255,.2)';
+      cell.style.boxShadow = 'none';
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  AUDIO
+// ════════════════════════════════════════════════════════════
+
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function updateOscillators() {
+  if (!soundEnabled || !audioCtx) return;
+  // stop orphans
+  Object.keys(oscillators).forEach(id => {
+    if (!waves.find(w => w.id == id)) stopOscillator(+id);
+  });
+  waves.forEach(w => {
+    if (w.muted) { stopOscillator(w.id); return; }
+    const hz = 55 * Math.pow(2, (w.freq - 0.5) / 7 * 4);
+    if (!oscillators[w.id]) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = hz;
+      gain.gain.value = w.amp * 0.12;
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start();
+      oscillators[w.id] = { osc, gain };
+    } else {
+      oscillators[w.id].osc.frequency.setTargetAtTime(hz, audioCtx.currentTime, 0.1);
+      oscillators[w.id].gain.gain.setTargetAtTime(w.amp * 0.12, audioCtx.currentTime, 0.1);
+    }
+  });
+}
+
+function stopOscillator(id) {
+  if (oscillators[id]) {
+    try { oscillators[id].osc.stop(); } catch(e){}
+    delete oscillators[id];
+  }
+}
+
+function stopAllOscillators() {
+  Object.keys(oscillators).forEach(id => stopOscillator(+id));
+}
+
+// ════════════════════════════════════════════════════════════
+//  LOOP
+// ════════════════════════════════════════════════════════════
+
+function loop(ts) {
+  if (!playing) return;
+  if (lastTs === null) lastTs = ts;
+  time += (ts - lastTs) / 1000 * speed;
+  lastTs = ts;
+
+  drawWaves();
+  drawBeat();
+  updateUI();
+
+  animFrame = requestAnimationFrame(loop);
+}
+
+// ════════════════════════════════════════════════════════════
+//  TABS
+// ════════════════════════════════════════════════════════════
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('visible'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('visible');
+  });
+});
+
+// ════════════════════════════════════════════════════════════
+//  GLOBAL CONTROLS
+// ════════════════════════════════════════════════════════════
+
+document.getElementById('btnPlay').addEventListener('click', function() {
+  playing = !playing;
+  this.textContent = playing ? '▶ Play' : '⏸ Pausa';
+  this.classList.toggle('active', playing);
+  if (playing) { lastTs = null; animFrame = requestAnimationFrame(loop); }
+  else cancelAnimationFrame(animFrame);
+});
+
+document.getElementById('btnSound').addEventListener('click', function() {
+  soundEnabled = !soundEnabled;
+  this.classList.toggle('active', soundEnabled);
+  if (soundEnabled) { initAudio(); updateOscillators(); }
+  else stopAllOscillators();
+});
+
+document.getElementById('btnClear').addEventListener('click', () => {
+  stopAllOscillators();
+  waves = [];
+  oscillators = {};
+  activePresets.emotions.clear();
+  activePresets.organs.clear();
+  updatePresetButtonStates();
+  renderActiveWaves();
+  updateLegend();
+});
+
+document.getElementById('speedSlider').addEventListener('input', function() {
+  speed = parseFloat(this.value);
+  document.getElementById('speedVal').textContent = speed.toFixed(1)+'×';
+});
+
+// ════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════
+
+buildDimsGrid();
+buildEmotionGrid();
+buildOrganGrid();
+animFrame = requestAnimationFrame(loop);
+</script>
+</body>
+</html>
