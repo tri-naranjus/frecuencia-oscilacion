@@ -450,6 +450,11 @@ input[type=range]::-webkit-slider-thumb {
       <input type="range" id="speedSlider" min=".1" max="4" step=".05" value="1">
       <span id="speedVal" style="width:28px;text-align:right">1×</span>
     </div>
+
+    <div class="global-btns" style="margin-top:10px">
+      <button class="g-btn" id="btnMeditate">🧘 Meditar</button>
+      <button class="g-btn" id="btnHealFreq">💊 Sanación</button>
+    </div>
   </div>
 
   <!-- ══ CENTRO: CANVAS ══ -->
@@ -1310,6 +1315,175 @@ document.getElementById('btnClear').addEventListener('click', () => {
   renderActiveWaves();
   updateLegend();
 });
+
+// ════════════════════════════════════════════════════════════
+//  MEDITATION MODE
+// ════════════════════════════════════════════════════════════
+
+let meditationActive = false;
+let meditationStartTime = 0;
+const MEDITATION_DURATION = 300000; // 5 minutes in ms
+
+document.getElementById('btnMeditate').addEventListener('click', function() {
+  meditationActive = !meditationActive;
+
+  if (meditationActive) {
+    // Activate Paz (Peace) — index 1 in EMOTIONS
+    const peacePath = `e_1`;
+    if (!activePresets.emotions.has(1)) {
+      togglePreset('e', 1);
+    }
+
+    meditationStartTime = Date.now();
+    this.classList.add('active');
+    this.textContent = '🧘 Meditando...';
+
+    // Start meditation animation loop
+    meditateLoop();
+  } else {
+    this.classList.remove('active');
+    this.textContent = '🧘 Meditar';
+  }
+});
+
+function meditateLoop() {
+  if (!meditationActive) return;
+
+  const elapsed = Date.now() - meditationStartTime;
+  const progress = Math.min(elapsed / MEDITATION_DURATION, 1);
+
+  // Find the Paz wave
+  const pazWave = waves.find(w => w.label && w.label.includes('Paz'));
+
+  if (pazWave) {
+    // Animate amplitude: start at 0.2 (baseline), end at 0.9 (full peace)
+    const baseAmp = emotionToAmp(600); // Paz level is 600
+    pazWave.amp = baseAmp * (0.3 + progress * 0.7);
+
+    // Reduce draining emotions
+    ['Miedo', 'Ira', 'Vergüenza', 'Culpa', 'Apatía'].forEach(emotionName => {
+      const idx = EMOTIONS.findIndex(e => e.name === emotionName);
+      const wave = waves.find(w => w.label && w.label.includes(emotionName));
+      if (wave && progress < 1) {
+        // Gradually reduce their amplitude
+        const reduction = 1 - (progress * 0.5);
+        wave.amp = emotionToAmp(EMOTIONS[idx].level) * reduction;
+      }
+    });
+  }
+
+  if (progress < 1) {
+    requestAnimationFrame(meditateLoop);
+  } else {
+    // Meditation complete
+    meditationActive = false;
+    const btn = document.getElementById('btnMeditate');
+    btn.classList.remove('active');
+    btn.textContent = '🧘 ¡Meditación completa!';
+    setTimeout(() => {
+      btn.textContent = '🧘 Meditar';
+    }, 2000);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  HEALING FREQUENCY CALCULATOR
+// ════════════════════════════════════════════════════════════
+
+document.getElementById('btnHealFreq').addEventListener('click', function() {
+  // Analyze current waves and suggest a healing frequency
+
+  if (waves.length === 0) {
+    alert('Activa algunas ondas primero para calcular una frecuencia de sanación personalizada.');
+    return;
+  }
+
+  // Calculate average frequency and imbalance
+  let emotionFreqs = [];
+  let organFreqs = [];
+  let diseasePresent = false;
+
+  waves.forEach(w => {
+    if (w.label.includes('MHz')) {
+      organFreqs.push(w.freq);
+      // Check if it's a disease frequency
+      const diseaseOrgans = ['Influenza', 'Viral', 'Epstein', 'Deterioro', 'Cáncer', 'Muerte'];
+      if (diseaseOrgans.some(d => w.label.includes(d))) {
+        diseasePresent = true;
+      }
+    } else {
+      emotionFreqs.push(w.freq);
+    }
+  });
+
+  // Suggest healing frequency
+  let suggestion = '';
+  let suggestedOrgansIndices = [];
+
+  if (diseasePresent) {
+    // If disease present, suggest healthy organs
+    suggestion = 'Enfermedad detectada. Activando órganos saludables para sanación.';
+    const healthyOrgans = [1, 2, 3, 4, 5, 6, 7, 8]; // Healthy organs indices
+    suggestedOrgansIndices = healthyOrgans.filter(i => !activePresets.organs.has(i));
+  } else if (emotionFreqs.length > 0 && emotionFreqs.some(f => f < 3)) {
+    // If low emotion frequencies present, suggest heart coherence
+    suggestion = 'Baja frecuencia emocional detectada. Activando Corazón para sincronización.';
+    suggestedOrgansIndices = [2]; // Corazón (Heart)
+  } else {
+    // Suggest brain optimization
+    suggestion = 'Sistema balanceado. Activando Cerebro Genio para optimización.';
+    suggestedOrgansIndices = [0]; // Cerebro Genio
+  }
+
+  // Activate suggested organs
+  suggestedOrgansIndices.slice(0, 2).forEach(idx => {
+    if (!activePresets.organs.has(idx)) {
+      togglePreset('o', idx);
+    }
+  });
+
+  // Show result
+  const organ = ORGANS[suggestedOrgansIndices[0]] || ORGANS[0];
+  const message = `${suggestion}\n\n🎯 Frecuencia sugerida: ${organ.name} (${organ.mhz} MHz)\n\nCoherencia cardiaca activada para máxima sincronización.`;
+
+  // Create a simple toast/notification instead of alert
+  const notif = document.createElement('div');
+  notif.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(100, 200, 100, 0.9);
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 8px;
+    max-width: 300px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    z-index: 999;
+    animation: slideIn 0.3s ease-out;
+  `;
+  notif.textContent = message;
+  document.body.appendChild(notif);
+
+  setTimeout(() => {
+    notif.style.animation = 'slideOut 0.3s ease-out';
+    setTimeout(() => notif.remove(), 300);
+  }, 5000);
+});
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from { transform: translateX(-400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(-400px); opacity: 0; }
+  }
+`;
+document.head.appendChild(style);
 
 document.getElementById('speedSlider').addEventListener('input', function() {
   speed = parseFloat(this.value);
