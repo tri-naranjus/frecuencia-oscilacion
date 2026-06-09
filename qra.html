@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Resonance Analyzer — QRA-9000</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+:root {
+  --bg: #020408;
+  --panel: #040c14;
+  --border: #0a3a5a;
+  --cyan: #00e5ff;
+  --green: #00ff88;
+  --amber: #ffaa00;
+  --red: #ff3355;
+  --purple: #b060ff;
+  --dim: #1a3a50;
+  --text: #7ec8e3;
+  --text2: #3a7a9a;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Courier New', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+/* ── SCANLINES ── */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.15) 2px, rgba(0,0,0,.15) 4px);
+  pointer-events:none;
+  z-index:999;
+}
+
+/* ── HEADER ── */
+header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 20px;
+  border-bottom:1px solid var(--border);
+  background: linear-gradient(90deg, #020c14, #040e1c, #020c14);
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+.logo {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.logo-icon {
+  width:36px;height:36px;
+  border:2px solid var(--cyan);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 12px var(--cyan), inset 0 0 8px rgba(0,229,255,.2);
+  animation: pulse-logo 3s ease-in-out infinite;
+}
+@keyframes pulse-logo {
+  0%,100%{box-shadow:0 0 12px var(--cyan), inset 0 0 8px rgba(0,229,255,.2);}
+  50%{box-shadow:0 0 24px var(--cyan), inset 0 0 16px rgba(0,229,255,.4);}
+}
+.logo-icon svg { width:18px;height:18px; }
+.logo-text h1 { font-size:.8rem; letter-spacing:.3em; color:var(--cyan); text-shadow:0 0 10px var(--cyan); }
+.logo-text p  { font-size:.55rem; letter-spacing:.2em; color:var(--text2); }
+
+.header-status {
+  display:flex; gap:20px; align-items:center;
+}
+.status-item {
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.status-label { font-size:.5rem; letter-spacing:.15em; color:var(--text2); }
+.status-value { font-size:.75rem; letter-spacing:.1em; }
+.status-value.cyan  { color:var(--cyan);  text-shadow:0 0 8px var(--cyan); }
+.status-value.green { color:var(--green); text-shadow:0 0 8px var(--green); }
+.status-value.amber { color:var(--amber); text-shadow:0 0 8px var(--amber); }
+
+.header-alert {
+  font-size:.6rem; letter-spacing:.2em;
+  color:var(--green);
+  text-shadow:0 0 8px var(--green);
+  animation:blink 2s step-end infinite;
+}
+@keyframes blink {50%{opacity:0;}}
+
+/* ── GRID LAYOUT ── */
+.grid {
+  display:grid;
+  grid-template-columns: 260px 1fr 260px;
+  grid-template-rows: auto auto;
+  gap:10px;
+  padding:10px;
+  max-width:1600px;
+  margin:0 auto;
+}
+
+/* ── PANEL BASE ── */
+.panel {
+  background: var(--panel);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:10px;
+  position:relative;
+  overflow:hidden;
+}
+.panel::before {
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  opacity:.5;
+}
+.panel-title {
+  font-size:.55rem;
+  letter-spacing:.25em;
+  color:var(--text2);
+  text-transform:uppercase;
+  margin-bottom:8px;
+  padding-bottom:6px;
+  border-bottom:1px solid var(--dim);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.panel-badge {
+  font-size:.45rem;
+  padding:2px 6px;
+  border-radius:2px;
+  letter-spacing:.1em;
+}
+.badge-active { background:rgba(0,255,136,.15); color:var(--green); border:1px solid rgba(0,255,136,.3); }
+.badge-live   { background:rgba(0,229,255,.15); color:var(--cyan);  border:1px solid rgba(0,229,255,.3); }
+.badge-warn   { background:rgba(255,170,0,.15); color:var(--amber); border:1px solid rgba(255,170,0,.3); }
+
+/* ── LEFT COLUMN ── */
+.col-left { display:flex; flex-direction:column; gap:10px; }
+
+/* Orbital atom display */
+.atom-container {
+  display:flex; align-items:center; justify-content:center;
+  height:180px;
+  position:relative;
+}
+#atomCanvas { position:absolute; }
+
+/* Metrics list */
+.metric-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:5px 0;
+  border-bottom:1px solid rgba(10,58,90,.5);
+  font-size:.65rem;
+}
+.metric-row:last-child { border-bottom:none; }
+.metric-name { color:var(--text2); letter-spacing:.1em; }
+.metric-val  { letter-spacing:.05em; font-weight:bold; }
+.metric-bar-wrap { width:70px; height:4px; background:var(--dim); border-radius:2px; overflow:hidden; }
+.metric-bar { height:100%; border-radius:2px; transition:width .5s ease; }
+
+/* Frequency dial */
+.dial-wrap {
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+}
+#dialCanvas { cursor:grab; }
+.dial-readout {
+  font-size:1.4rem;
+  letter-spacing:.1em;
+  color:var(--cyan);
+  text-shadow:0 0 15px var(--cyan);
+  text-align:center;
+}
+.dial-unit { font-size:.5rem; color:var(--text2); letter-spacing:.2em; }
+
+/* ── CENTER COLUMN ── */
+.col-center { display:flex; flex-direction:column; gap:10px; }
+.main-scope {
+  height:200px;
+  position:relative;
+  background: radial-gradient(ellipse at center, #051020 0%, var(--panel) 100%);
+}
+#scopeCanvas { width:100%; height:100%; }
+
+.spectrogram-wrap {
+  height:120px;
+  position:relative;
+}
+#spectroCanvas { width:100%; height:100%; }
+
+.lissajous-row {
+  display:flex; gap:10px;
+}
+.lissajous-wrap { flex:1; height:160px; display:flex;align-items:center;justify-content:center; }
+
+/* ── WATERFALL ── */
+.waterfall-wrap { height:120px; position:relative; overflow:hidden; }
+#waterfallCanvas { width:100%; height:100%; }
+
+/* ── RIGHT COLUMN ── */
+.col-right { display:flex; flex-direction:column; gap:10px; }
+
+/* Radar */
+.radar-wrap {
+  display:flex; align-items:center; justify-content:center;
+  height:180px;
+}
+#radarCanvas {}
+
+/* Coherence bars */
+.coherence-item {
+  margin-bottom:8px;
+}
+.coherence-header {
+  display:flex; justify-content:space-between;
+  font-size:.6rem; margin-bottom:3px;
+}
+.coherence-name { color:var(--text2); letter-spacing:.1em; }
+.coherence-pct  { color:var(--cyan);  }
+.coherence-bar-bg {
+  height:6px; background:var(--dim); border-radius:3px; overflow:hidden;
+}
+.coherence-bar-fill {
+  height:100%; border-radius:3px;
+  transition: width .8s cubic-bezier(.4,0,.2,1);
+}
+
+/* Event log */
+.event-log {
+  height:110px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column-reverse;
+  gap:2px;
+}
+.log-entry {
+  font-size:.55rem;
+  letter-spacing:.05em;
+  padding:2px 4px;
+  border-left:2px solid transparent;
+  animation:log-fade-in .3s ease;
+}
+@keyframes log-fade-in {from{opacity:0;transform:translateX(10px);}to{opacity:1;transform:none;}}
+.log-cyan   { color:rgba(0,229,255,.8); border-color:var(--cyan); }
+.log-green  { color:rgba(0,255,136,.8); border-color:var(--green); }
+.log-amber  { color:rgba(255,170,0,.8); border-color:var(--amber); }
+.log-red    { color:rgba(255,51,85,.8); border-color:var(--red); }
+
+/* ── BOTTOM BAR ── */
+.bottom-bar {
+  grid-column: 1/-1;
+  display:flex; gap:10px;
+}
+.bottom-bar .panel { flex:1; }
+
+/* Buttons */
+.controls {
+  display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;
+}
+.btn {
+  font-family: 'Courier New', monospace;
+  font-size:.55rem;
+  letter-spacing:.15em;
+  padding:5px 10px;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text2);
+  border-radius:2px;
+  cursor:pointer;
+  text-transform:uppercase;
+  transition:all .2s;
+}
+.btn:hover  { border-color:var(--cyan); color:var(--cyan); box-shadow:0 0 8px rgba(0,229,255,.3); }
+.btn.active { border-color:var(--green); color:var(--green); background:rgba(0,255,136,.1); box-shadow:0 0 8px rgba(0,255,136,.3); }
+.btn.danger { border-color:var(--red); color:var(--red); }
+.btn.danger:hover { background:rgba(255,51,85,.1); box-shadow:0 0 8px rgba(255,51,85,.3); }
+
+/* Sliders */
+.slider-row { display:flex; align-items:center; gap:8px; margin-top:6px; font-size:.6rem; }
+.slider-label { color:var(--text2); width:80px; letter-spacing:.1em; flex-shrink:0; }
+input[type=range] {
+  flex:1;
+  -webkit-appearance:none;
+  height:3px;
+  background:var(--dim);
+  border-radius:2px;
+  outline:none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none;
+  width:12px; height:12px;
+  background:var(--cyan);
+  border-radius:50%;
+  cursor:pointer;
+  box-shadow:0 0 6px var(--cyan);
+}
+.slider-val { color:var(--cyan); width:50px; text-align:right; letter-spacing:.05em; }
+
+/* Quantum state indicator */
+.qstate {
+  display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;
+}
+.qstate-bit {
+  width:28px; height:28px;
+  border:1px solid var(--border);
+  border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;
+  transition:all .3s;
+}
+.qstate-bit.on {
+  background:rgba(0,229,255,.15);
+  border-color:var(--cyan);
+  color:var(--cyan);
+  box-shadow:0 0 8px rgba(0,229,255,.4);
+}
+.qstate-bit.off { color:var(--dim); }
+
+/* Entanglement matrix */
+#entanglementCanvas {}
+
+/* Particle canvas overlay on main scope */
+#particleCanvas {
+  position:absolute;
+  top:0;left:0;
+  pointer-events:none;
+}
+
+.no-data { color:var(--text2); font-size:.6rem; text-align:center; padding:20px; letter-spacing:.1em; }
+
+/* Responsive */
+@media(max-width:1100px){
+  .grid { grid-template-columns: 1fr 1fr; }
+  .col-left, .col-right { display:contents; }
+}
+@media(max-width:700px){
+  .grid { grid-template-columns: 1fr; }
+  .lissajous-row { flex-direction:column; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--cyan)">
+        <circle cx="12" cy="12" r="3"/>
+        <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(0 12 12)" stroke-opacity=".6"/>
+        <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)" stroke-opacity=".6"/>
+        <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(120 12 12)" stroke-opacity=".6"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <h1>Quantum Resonance Analyzer</h1>
+      <p>QRA-9000 · SERIES IV · DEEP FIELD EDITION</p>
+    </div>
+  </div>
+  <div class="header-status">
+    <div class="status-item">
+      <span class="status-label">FREQ</span>
+      <span class="status-value cyan" id="hFreq">432.00 Hz</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">COHERENCE</span>
+      <span class="status-value green" id="hCoherence">98.7%</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">PHASE</span>
+      <span class="status-value amber" id="hPhase">Φ 0.00°</span>
+    </div>
+    <div class="status-item">
+      <span class="status-label">ENTANGLE</span>
+      <span class="status-value cyan" id="hEntangle">ACTIVE</span>
+    </div>
+  </div>
+  <div class="header-alert">● SYSTEM ONLINE</div>
+</header>
+
+<!-- MAIN GRID -->
+<div class="grid">
+
+  <!-- LEFT COL -->
+  <div class="col-left">
+
+    <!-- Atom display -->
+    <div class="panel">
+      <div class="panel-title">QUANTUM STATE VISUALIZER <span class="panel-badge badge-active">ACTIVE</span></div>
+      <div class="atom-container">
+        <canvas id="atomCanvas" width="220" height="160"></canvas>
+      </div>
+    </div>
+
+    <!-- Metrics -->
+    <div class="panel">
+      <div class="panel-title">FIELD METRICS <span class="panel-badge badge-live">LIVE</span></div>
+      <div id="metricsContainer"></div>
+    </div>
+
+    <!-- Dial -->
+    <div class="panel">
+      <div class="panel-title">RESONANCE FREQUENCY</div>
+      <div class="dial-wrap">
+        <canvas id="dialCanvas" width="180" height="180"></canvas>
+        <div class="dial-readout" id="dialReadout">432.00</div>
+        <div class="dial-unit">HERTZ · QUANTUM TUNED</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CENTER COL -->
+  <div class="col-center">
+
+    <!-- Main oscilloscope -->
+    <div class="panel main-scope" id="scopePanel">
+      <div class="panel-title">QUANTUM WAVEFORM OSCILLOSCOPE <span class="panel-badge badge-live">LIVE</span></div>
+      <canvas id="scopeCanvas"></canvas>
+      <canvas id="particleCanvas"></canvas>
+    </div>
+
+    <!-- Spectrogram -->
+    <div class="panel spectrogram-wrap">
+      <div class="panel-title">SPECTRAL DENSITY ANALYSIS <span class="panel-badge badge-live">LIVE</span></div>
+      <canvas id="spectroCanvas"></canvas>
+    </div>
+
+    <!-- Lissajous + Entanglement -->
+    <div class="lissajous-row">
+      <div class="panel lissajous-wrap" style="flex-direction:column;gap:6px;justify-content:flex-start;padding:10px;">
+        <div class="panel-title" style="width:100%">LISSAJOUS FIGURE <span class="panel-badge badge-active">XY</span></div>
+        <canvas id="lissajousCanvas" width="200" height="130"></canvas>
+      </div>
+      <div class="panel lissajous-wrap" style="flex-direction:column;gap:6px;justify-content:flex-start;padding:10px;">
+        <div class="panel-title" style="width:100%">ENTANGLEMENT MATRIX <span class="panel-badge badge-active">8Q</span></div>
+        <canvas id="entanglementCanvas" width="200" height="130"></canvas>
+      </div>
+    </div>
+
+    <!-- Waterfall -->
+    <div class="panel waterfall-wrap">
+      <div class="panel-title">FREQUENCY WATERFALL <span class="panel-badge badge-live">LIVE</span></div>
+      <canvas id="waterfallCanvas"></canvas>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COL -->
+  <div class="col-right">
+
+    <!-- Radar -->
+    <div class="panel">
+      <div class="panel-title">QUANTUM FIELD RADAR <span class="panel-badge badge-live">SCAN</span></div>
+      <div class="radar-wrap">
+        <canvas id="radarCanvas" width="220" height="160"></canvas>
+      </div>
+    </div>
+
+    <!-- Coherence bars -->
+    <div class="panel">
+      <div class="panel-title">DIMENSIONAL COHERENCE <span class="panel-badge badge-warn">MONITOR</span></div>
+      <div id="coherenceContainer"></div>
+    </div>
+
+    <!-- Quantum bits -->
+    <div class="panel">
+      <div class="panel-title">QUBIT REGISTER <span class="panel-badge badge-active">|ψ⟩</span></div>
+      <div class="qstate" id="qubitRegister"></div>
+    </div>
+
+    <!-- Event log -->
+    <div class="panel">
+      <div class="panel-title">QUANTUM EVENT LOG</div>
+      <div class="event-log" id="eventLog"></div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <div class="panel" style="flex:2">
+      <div class="panel-title">SIGNAL CONTROLS</div>
+      <div class="controls" id="modeControls">
+        <button class="btn active" data-mode="sine">SINE WAVE</button>
+        <button class="btn" data-mode="square">SQUARE</button>
+        <button class="btn" data-mode="sawtooth">SAWTOOTH</button>
+        <button class="btn" data-mode="chaos">CHAOS</button>
+        <button class="btn" data-mode="quantum">QUANTUM</button>
+        <button class="btn" data-mode="binaural">BINAURAL</button>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">AMPLITUDE</span>
+        <input type="range" id="ampSlider" min="10" max="100" value="60">
+        <span class="slider-val" id="ampVal">60%</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">FREQUENCY</span>
+        <input type="range" id="freqSlider" min="1" max="1000" value="432">
+        <span class="slider-val" id="freqVal">432 Hz</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label">MODULATION</span>
+        <input type="range" id="modSlider" min="0" max="100" value="30">
+        <span class="slider-val" id="modVal">30%</span>
+      </div>
+    </div>
+    <div class="panel" style="flex:1">
+      <div class="panel-title">SYSTEM CONTROLS</div>
+      <div class="controls">
+        <button class="btn active" id="btnScan">● SCANNING</button>
+        <button class="btn" id="btnFreeze">❚❚ FREEZE</button>
+        <button class="btn danger" id="btnReset">↺ RESET</button>
+        <button class="btn" id="btnCapture">⊡ CAPTURE</button>
+        <button class="btn" id="btnBoost">↑ BOOST</button>
+      </div>
+    </div>
+    <div class="panel" style="flex:1">
+      <div class="panel-title">ANALYSIS PROFILE</div>
+      <div class="controls" id="profileControls">
+        <button class="btn active" data-profile="standard">STANDARD</button>
+        <button class="btn" data-profile="deep">DEEP SCAN</button>
+        <button class="btn" data-profile="resonance">RESONANCE</button>
+        <button class="btn" data-profile="void">VOID MODE</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+const state = {
+  freq: 432,
+  amp: 0.6,
+  mod: 0.3,
+  mode: 'sine',
+  profile: 'standard',
+  frozen: false,
+  scanning: true,
+  t: 0,
+  boost: 1,
+  chaos: [],
+  phase: 0,
+  coherences: [94.2, 87.5, 91.0, 88.3, 96.1, 82.7],
+  metrics: [
+    {name:'SCALAR FIELD',    val:0, color:'#00e5ff', unit:'T'},
+    {name:'ZERO POINT',      val:0, color:'#00ff88', unit:'eV'},
+    {name:'SPIN COHERENCE',  val:0, color:'#b060ff', unit:'%'},
+    {name:'TORSION FIELD',   val:0, color:'#ffaa00', unit:'nT'},
+    {name:'BIOPHOTON FLUX',  val:0, color:'#00e5ff', unit:'ph/s'},
+    {name:'PLANCK RESONANCE',val:0, color:'#00ff88', unit:'Hz'},
+  ],
+  qubits: Array(8).fill(0),
+  radarData: Array(12).fill(0).map(()=>Math.random()),
+  radarAngle: 0,
+  radarSweep: 0,
+  waterfallRows: [],
+  spectroData: [],
+  particles: [],
+  lissPhase: 0,
+  entangleMatrix: Array(8).fill(null).map(()=>Array(8).fill(Math.random())),
+  logEntries: [],
+};
+
+// ── CANVAS REFS ───────────────────────────────────────────────────────────
+const scopeEl      = document.getElementById('scopeCanvas');
+const particleEl   = document.getElementById('particleCanvas');
+const spectroEl    = document.getElementById('spectroCanvas');
+const lissEl       = document.getElementById('lissajousCanvas');
+const entEl        = document.getElementById('entanglementCanvas');
+const waterfallEl  = document.getElementById('waterfallCanvas');
+const atomEl       = document.getElementById('atomCanvas');
+const dialEl       = document.getElementById('dialCanvas');
+const radarEl      = document.getElementById('radarCanvas');
+
+const scopeCtx     = scopeEl.getContext('2d');
+const particleCtx  = particleEl.getContext('2d');
+const spectroCtx   = spectroEl.getContext('2d');
+const lissCtx      = lissEl.getContext('2d');
+const entCtx       = entEl.getContext('2d');
+const wfCtx        = waterfallEl.getContext('2d');
+const atomCtx      = atomEl.getContext('2d');
+const dialCtx      = dialEl.getContext('2d');
+const radarCtx     = radarEl.getContext('2d');
+
+function resizeCanvases() {
+  const scopePanel = document.getElementById('scopePanel');
+  const r = scopePanel.getBoundingClientRect();
+  scopeEl.width     = r.width - 20;
+  scopeEl.height    = scopeEl.parentElement.offsetHeight - 34;
+  particleEl.width  = scopeEl.width;
+  particleEl.height = scopeEl.height;
+  spectroEl.width   = spectroEl.parentElement.offsetWidth - 20;
+  spectroEl.height  = spectroEl.parentElement.offsetHeight - 34;
+  waterfallEl.width  = waterfallEl.parentElement.offsetWidth - 20;
+  waterfallEl.height = waterfallEl.parentElement.offsetHeight - 34;
+}
+resizeCanvases();
+window.addEventListener('resize', resizeCanvases);
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+const rnd  = (a,b) => a + Math.random()*(b-a);
+const clamp= (v,a,b) => Math.max(a,Math.min(b,v));
+const lerp = (a,b,t) => a + (b-a)*t;
+
+function hexToRgba(hex, a) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+// ── WAVEFORM GENERATOR ────────────────────────────────────────────────────
+function sampleWave(t, freq, amp, mod, mode) {
+  const omega = freq * 0.05;
+  switch(mode) {
+    case 'sine':
+      return amp * Math.sin(omega * t) * (1 + mod * 0.3 * Math.sin(omega*0.37*t));
+    case 'square':
+      return amp * Math.sign(Math.sin(omega * t));
+    case 'sawtooth':
+      return amp * (2 * ((omega*t/(2*Math.PI)) % 1) - 1);
+    case 'chaos':
+      return amp * (
+        0.5*Math.sin(omega*t) +
+        0.3*Math.sin(omega*2.73*t + 1.1) +
+        0.2*Math.sin(omega*5.17*t - 0.4) +
+        0.1*Math.sin(omega*11.3*t)
+      );
+    case 'quantum':
+      return amp * Math.sin(omega*t) *
+        Math.cos(omega*0.618*t) *
+        (1 + 0.2*Math.sin(omega*3.14159*t));
+    case 'binaural':
+      return amp * (
+        Math.sin(omega*t) +
+        Math.sin((omega + 0.1)*t)
+      ) * 0.5;
+    default:
+      return amp * Math.sin(omega * t);
+  }
+}
+
+// ── PARTICLE SYSTEM ───────────────────────────────────────────────────────
+function spawnParticle() {
+  const cx = particleEl.width/2;
+  const y  = particleEl.height/2;
+  state.particles.push({
+    x: cx + rnd(-cx*0.8, cx*0.8),
+    y: y + sampleWave(state.t, state.freq, state.amp * particleEl.height*0.4, state.mod, state.mode),
+    vx: rnd(-0.5,0.5),
+    vy: rnd(-2,-0.5),
+    life: 1,
+    decay: rnd(0.015,0.04),
+    size: rnd(1,3),
+    color: ['#00e5ff','#00ff88','#b060ff'][Math.floor(Math.random()*3)],
+  });
+}
+
+function updateParticles() {
+  if(Math.random() < 0.25) spawnParticle();
+  state.particles = state.particles.filter(p => p.life > 0);
+  state.particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.life -= p.decay;
+  });
+}
+
+// ── DRAW OSCILLOSCOPE ─────────────────────────────────────────────────────
+function drawScope() {
+  const W = scopeEl.width, H = scopeEl.height;
+  const ctx = scopeCtx;
+  ctx.clearRect(0,0,W,H);
+
+  // grid
+  ctx.strokeStyle = 'rgba(0,58,90,.4)';
+  ctx.lineWidth = .5;
+  const gx = 10, gy = 5;
+  for(let i=0;i<=gx;i++){
+    ctx.beginPath();ctx.moveTo(i*W/gx,0);ctx.lineTo(i*W/gx,H);ctx.stroke();
+  }
+  for(let i=0;i<=gy;i++){
+    ctx.beginPath();ctx.moveTo(0,i*H/gy);ctx.lineTo(W,i*H/gy);ctx.stroke();
+  }
+  // center line
+  ctx.strokeStyle='rgba(0,229,255,.15)';
+  ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();
+
+  if(state.frozen) return;
+
+  // glow wave (thick)
+  const drawWave = (offset, alpha, width, color) => {
+    ctx.strokeStyle = color || `rgba(0,229,255,${alpha})`;
+    ctx.lineWidth = width;
+    ctx.shadowColor = '#00e5ff';
+    ctx.shadowBlur = width > 1 ? 8 : 0;
+    ctx.beginPath();
+    for(let x=0;x<W;x++){
+      const t = state.t - (W-x)*0.5 + offset;
+      const y = H/2 - sampleWave(t, state.freq, state.amp*(H*0.42), state.mod, state.mode);
+      x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur=0;
+  };
+
+  drawWave(0, .12, 6, `rgba(0,229,255,.1)`);
+  drawWave(0, .3,  2, `rgba(0,229,255,.5)`);
+  drawWave(0, 1,   1.5, `rgba(0,229,255,1)`);
+
+  if(state.profile==='resonance'){
+    drawWave(5, .3, 1, 'rgba(0,255,136,.5)');
+    drawWave(-5,.3, 1, 'rgba(176,96,255,.5)');
+  }
+
+  // particles
+  updateParticles();
+  particleCtx.clearRect(0,0,W,H);
+  state.particles.forEach(p => {
+    particleCtx.globalAlpha = p.life;
+    particleCtx.fillStyle = p.color;
+    particleCtx.shadowColor = p.color;
+    particleCtx.shadowBlur = 6;
+    particleCtx.beginPath();
+    particleCtx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+    particleCtx.fill();
+  });
+  particleCtx.globalAlpha = 1;
+  particleCtx.shadowBlur = 0;
+}
+
+// ── DRAW SPECTROGRAM ──────────────────────────────────────────────────────
+function drawSpectrogram() {
+  const W = spectroEl.width, H = spectroEl.height;
+  const ctx = spectroCtx;
+  ctx.clearRect(0,0,W,H);
+
+  const bars = 80;
+  const bw = W/bars;
+  for(let i=0;i<bars;i++){
+    const baseFreq = (i/bars) * state.freq * 3;
+    const t = state.t * 0.02;
+    let v = 0;
+    switch(state.mode){
+      case 'sine':    v = Math.abs(Math.sin(i*0.2 + t)*Math.exp(-i*0.01)); break;
+      case 'square':  v = i<bars/2 ? Math.abs(Math.sin(i*0.3 + t)) : Math.abs(Math.sin(i*0.15+t))*0.3; break;
+      case 'sawtooth':v = (1-(i/bars))*Math.abs(Math.sin(t*2+i*0.1)); break;
+      case 'chaos':   v = Math.abs(Math.sin(i*0.3+t)*Math.cos(i*0.17-t*0.7)*Math.sin(i*0.07)); break;
+      case 'quantum': v = Math.abs(Math.sin(i*0.618+t)*Math.cos(i*0.382+t*0.5)); break;
+      case 'binaural':v = (i<3||Math.abs(i-Math.floor(bars*0.1))<2) ? Math.abs(Math.sin(t*3))*0.8 : Math.abs(Math.sin(i*0.2+t))*0.2; break;
+    }
+    v = clamp(v * state.amp * state.boost, 0, 1);
+    const bh = v * (H-4);
+
+    const hue = 180 + (i/bars)*120;
+    const grd = ctx.createLinearGradient(0, H, 0, H-bh);
+    grd.addColorStop(0, `hsla(${hue},100%,60%,.8)`);
+    grd.addColorStop(1, `hsla(${hue+40},100%,80%,.4)`);
+    ctx.fillStyle = grd;
+    ctx.shadowColor = `hsl(${hue},100%,60%)`;
+    ctx.shadowBlur = 4;
+    ctx.fillRect(i*bw+1, H-bh, bw-2, bh);
+  }
+  ctx.shadowBlur=0;
+}
+
+// ── DRAW LISSAJOUS ────────────────────────────────────────────────────────
+function drawLissajous() {
+  const W = lissEl.width, H = lissEl.height;
+  const ctx = lissCtx;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='rgba(4,12,20,.3)';
+  ctx.fillRect(0,0,W,H);
+
+  const cx=W/2, cy=H/2;
+  const r=Math.min(cx,cy)-10;
+  const A=r*state.amp, B=r*state.amp;
+  const fa=state.freq*0.01, fb=fa*1.5 + state.mod*0.5;
+  const delta=state.lissPhase;
+
+  ctx.beginPath();
+  for(let i=0;i<=360;i++){
+    const t=(i/360)*Math.PI*2;
+    const x=cx + A*Math.sin(fa*t+delta);
+    const y=cy + B*Math.sin(fb*t);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle='rgba(176,96,255,.8)';
+  ctx.lineWidth=1.5;
+  ctx.shadowColor='#b060ff';
+  ctx.shadowBlur=6;
+  ctx.stroke();
+  ctx.shadowBlur=0;
+}
+
+// ── DRAW ENTANGLEMENT MATRIX ──────────────────────────────────────────────
+function drawEntanglement() {
+  const W = entEl.width, H = entEl.height;
+  const ctx = entCtx;
+  ctx.clearRect(0,0,W,H);
+  const n=8, cw=W/n, ch=H/n;
+  for(let i=0;i<n;i++){
+    for(let j=0;j<n;j++){
+      const v = clamp(state.entangleMatrix[i][j],0,1);
+      if(i===j){
+        ctx.fillStyle=`rgba(0,229,255,${v*0.9})`;
+      } else {
+        const d=Math.abs(i-j);
+        const hue = d===1?160:d===2?200:240;
+        ctx.fillStyle=`hsla(${hue},100%,60%,${v*0.7})`;
+      }
+      ctx.fillRect(j*cw+1,i*ch+1,cw-2,ch-2);
+      ctx.strokeStyle=`rgba(0,58,90,.5)`;
+      ctx.lineWidth=.5;
+      ctx.strokeRect(j*cw+.5,i*ch+.5,cw-1,ch-1);
+    }
+  }
+}
+
+// ── DRAW WATERFALL ────────────────────────────────────────────────────────
+function updateWaterfall() {
+  const W = waterfallEl.width;
+  const bars = W;
+  const row = [];
+  for(let i=0;i<bars;i++){
+    const t = state.t*0.02;
+    let v = Math.abs(Math.sin(i*state.freq*0.003+t)*Math.sin(i*0.05));
+    v = clamp(v*state.amp*state.boost,0,1);
+    row.push(v);
+  }
+  state.waterfallRows.unshift(row);
+  if(state.waterfallRows.length > waterfallEl.height) state.waterfallRows.pop();
+}
+
+function drawWaterfall() {
+  const W=waterfallEl.width, H=waterfallEl.height;
+  const ctx=wfCtx;
+  ctx.clearRect(0,0,W,H);
+  for(let r=0;r<Math.min(state.waterfallRows.length,H);r++){
+    const row=state.waterfallRows[r];
+    for(let i=0;i<row.length;i++){
+      const v=row[i];
+      const hue=200+v*120;
+      ctx.fillStyle=`hsla(${hue},100%,${30+v*50}%,${v*0.9+0.05})`;
+      ctx.fillRect(i,r,1,1);
+    }
+  }
+}
+
+// ── DRAW ATOM ─────────────────────────────────────────────────────────────
+function drawAtom() {
+  const W=atomEl.width, H=atomEl.height;
+  const ctx=atomCtx;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2, cy=H/2;
+  const t=state.t*0.01;
+
+  const orbits=[
+    {rx:80,ry:20,tilt:0,   color:'#00e5ff',speed:1.2},
+    {rx:70,ry:25,tilt:60,  color:'#00ff88',speed:0.8},
+    {rx:75,ry:18,tilt:120, color:'#b060ff',speed:1.5},
+  ];
+  const electronAngles=[t*1.2, t*0.8, t*1.5];
+
+  orbits.forEach((o,oi)=>{
+    // orbit ellipse
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(o.tilt*Math.PI/180);
+    ctx.beginPath();
+    ctx.ellipse(0,0,o.rx,o.ry,0,0,Math.PI*2);
+    ctx.strokeStyle=hexToRgba(o.color,.25);
+    ctx.lineWidth=1;
+    ctx.stroke();
+
+    // electron
+    const ex=o.rx*Math.cos(electronAngles[oi]);
+    const ey=o.ry*Math.sin(electronAngles[oi]);
+    const grd=ctx.createRadialGradient(ex,ey,0,ex,ey,5);
+    grd.addColorStop(0,o.color);
+    grd.addColorStop(1,'transparent');
+    ctx.fillStyle=grd;
+    ctx.shadowColor=o.color;
+    ctx.shadowBlur=10;
+    ctx.beginPath();
+    ctx.arc(ex,ey,3,0,Math.PI*2);
+    ctx.fillStyle=o.color;
+    ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.restore();
+  });
+
+  // nucleus
+  const pulse=1+0.1*Math.sin(t*8);
+  const ngrd=ctx.createRadialGradient(cx,cy,0,cx,cy,12*pulse);
+  ngrd.addColorStop(0,'rgba(0,229,255,1)');
+  ngrd.addColorStop(0.4,'rgba(0,229,255,.5)');
+  ngrd.addColorStop(1,'transparent');
+  ctx.fillStyle=ngrd;
+  ctx.shadowColor='#00e5ff';
+  ctx.shadowBlur=20;
+  ctx.beginPath();
+  ctx.arc(cx,cy,12*pulse,0,Math.PI*2);
+  ctx.fill();
+  ctx.shadowBlur=0;
+}
+
+// ── DRAW DIAL ─────────────────────────────────────────────────────────────
+function drawDial() {
+  const W=dialEl.width, H=dialEl.height;
+  const ctx=dialCtx;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2, cy=H/2, r=80;
+
+  // outer ring
+  ctx.strokeStyle='rgba(0,58,90,.6)';
+  ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+
+  // tick marks
+  for(let i=0;i<60;i++){
+    const a=(i/60)*Math.PI*2 - Math.PI/2;
+    const isMaj = i%5===0;
+    const r1=r-(isMaj?14:8), r2=r-2;
+    ctx.strokeStyle=isMaj?'rgba(0,229,255,.8)':'rgba(0,58,90,.8)';
+    ctx.lineWidth=isMaj?2:1;
+    ctx.beginPath();
+    ctx.moveTo(cx+r1*Math.cos(a), cy+r1*Math.sin(a));
+    ctx.lineTo(cx+r2*Math.cos(a), cy+r2*Math.sin(a));
+    ctx.stroke();
+  }
+
+  // arc fill based on freq
+  const pct = clamp(state.freq/1000, 0, 1);
+  const startA=-Math.PI/2, endA=startA+pct*Math.PI*2;
+  ctx.strokeStyle='rgba(0,229,255,.1)';
+  ctx.lineWidth=8;
+  ctx.beginPath();ctx.arc(cx,cy,r-20,startA,startA+Math.PI*2);ctx.stroke();
+
+  const grd=ctx.createConicalGradient?null:null;
+  ctx.strokeStyle=`rgba(0,229,255,.8)`;
+  ctx.lineWidth=6;
+  ctx.shadowColor='#00e5ff';
+  ctx.shadowBlur=8;
+  ctx.lineCap='round';
+  ctx.beginPath();ctx.arc(cx,cy,r-20,startA,endA);ctx.stroke();
+  ctx.shadowBlur=0;
+
+  // needle
+  const needleA=startA+pct*Math.PI*2;
+  ctx.strokeStyle='#00e5ff';
+  ctx.lineWidth=2;
+  ctx.shadowColor='#00e5ff';
+  ctx.shadowBlur=10;
+  ctx.beginPath();
+  ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+55*Math.cos(needleA), cy+55*Math.sin(needleA));
+  ctx.stroke();
+  ctx.shadowBlur=0;
+
+  // center dot
+  ctx.fillStyle='#00e5ff';
+  ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fill();
+}
+
+// ── DRAW RADAR ────────────────────────────────────────────────────────────
+function drawRadar() {
+  const W=radarEl.width, H=radarEl.height;
+  const ctx=radarCtx;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2, cy=H/2, r=Math.min(cx,cy)-10;
+
+  // rings
+  for(let i=1;i<=4;i++){
+    ctx.strokeStyle=`rgba(0,58,90,${.3+i*.05})`;
+    ctx.lineWidth=.5;
+    ctx.beginPath();ctx.arc(cx,cy,r*(i/4),0,Math.PI*2);ctx.stroke();
+  }
+  // cross lines
+  ctx.strokeStyle='rgba(0,58,90,.4)';
+  for(let i=0;i<6;i++){
+    const a=i*Math.PI/6;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));ctx.stroke();
+  }
+
+  // sweep
+  state.radarSweep += 0.02;
+  const sw=state.radarSweep;
+  const grd=ctx.createConicalGradient?ctx.createConicalGradient(cx,cy,sw):null;
+  // fallback sweep arc
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(sw);
+  const sweepGrd=ctx.createLinearGradient(0,-r,0,0);
+  sweepGrd.addColorStop(0,'rgba(0,229,255,0)');
+  sweepGrd.addColorStop(1,'rgba(0,229,255,.25)');
+  ctx.fillStyle=sweepGrd;
+  ctx.beginPath();
+  ctx.moveTo(0,0);
+  ctx.arc(0,0,r,-Math.PI*0.4,0);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // sweep line
+  ctx.strokeStyle='rgba(0,229,255,.8)';
+  ctx.lineWidth=1.5;
+  ctx.shadowColor='#00e5ff';
+  ctx.shadowBlur=6;
+  ctx.beginPath();
+  ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+r*Math.cos(sw), cy+r*Math.sin(sw));
+  ctx.stroke();
+  ctx.shadowBlur=0;
+
+  // blips
+  state.radarData.forEach((v,i)=>{
+    const a=i*(Math.PI*2/state.radarData.length);
+    const d=v*r*0.9;
+    const diff=((sw-a)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+    const age=diff/(Math.PI*2);
+    if(age<0.8){
+      const alpha=(1-age)*0.9;
+      ctx.fillStyle=`rgba(0,255,136,${alpha})`;
+      ctx.shadowColor='#00ff88';
+      ctx.shadowBlur=8*alpha;
+      ctx.beginPath();
+      ctx.arc(cx+d*Math.cos(a), cy+d*Math.sin(a), 2+age*2, 0, Math.PI*2);
+      ctx.fill();
+    }
+  });
+  ctx.shadowBlur=0;
+}
+
+// ── UPDATE METRICS ────────────────────────────────────────────────────────
+function updateMetrics() {
+  const t=state.t*0.005;
+  state.metrics[0].val = (10+8*Math.sin(t*1.1)).toFixed(2);
+  state.metrics[1].val = (2.4+1.2*Math.sin(t*0.7+1)).toFixed(3);
+  state.metrics[2].val = clamp(94+5*Math.sin(t*2),0,100).toFixed(1)+'%';
+  state.metrics[3].val = (0.3+0.15*Math.sin(t*1.5)).toFixed(3);
+  state.metrics[4].val = Math.floor(1e4+5e3*Math.sin(t*0.9));
+  state.metrics[5].val = (state.freq*(1+0.01*Math.sin(t*3))).toFixed(2);
+
+  const c = document.getElementById('metricsContainer');
+  c.innerHTML = state.metrics.map((m,i) => {
+    const pct=clamp((parseFloat(m.val)||50)/100,0,1)*100;
+    return `<div class="metric-row">
+      <span class="metric-name">${m.name}</span>
+      <div class="metric-bar-wrap"><div class="metric-bar" style="width:${pct}%;background:${m.color}"></div></div>
+      <span class="metric-val" style="color:${m.color};text-shadow:0 0 6px ${m.color}">${m.val} <small style="color:var(--text2);font-size:.5rem">${m.unit}</small></span>
+    </div>`;
+  }).join('');
+}
+
+// ── UPDATE COHERENCE ──────────────────────────────────────────────────────
+const COHERENCE_NAMES=['ALPHA WAVE','BETA WAVE','THETA WAVE','DELTA WAVE','GAMMA WAVE','LAMBDA WAVE'];
+const COHERENCE_COLORS=['#00e5ff','#00ff88','#b060ff','#ffaa00','#ff3355','#00e5ff'];
+
+function initCoherence() {
+  const c=document.getElementById('coherenceContainer');
+  c.innerHTML=COHERENCE_NAMES.map((n,i)=>`
+    <div class="coherence-item">
+      <div class="coherence-header">
+        <span class="coherence-name">${n}</span>
+        <span class="coherence-pct" id="cPct${i}" style="color:${COHERENCE_COLORS[i]}">${state.coherences[i].toFixed(1)}%</span>
+      </div>
+      <div class="coherence-bar-bg">
+        <div class="coherence-bar-fill" id="cBar${i}" style="width:${state.coherences[i]}%;background:${COHERENCE_COLORS[i]};box-shadow:0 0 6px ${COHERENCE_COLORS[i]}"></div>
+      </div>
+    </div>`).join('');
+}
+
+function updateCoherence() {
+  state.coherences = state.coherences.map((v,i)=>{
+    const target = 70+30*Math.abs(Math.sin(state.t*0.003+i*1.3));
+    return lerp(v, target, 0.02);
+  });
+  state.coherences.forEach((v,i)=>{
+    const bar=document.getElementById(`cBar${i}`);
+    const pct=document.getElementById(`cPct${i}`);
+    if(bar){ bar.style.width=v.toFixed(1)+'%'; }
+    if(pct){ pct.textContent=v.toFixed(1)+'%'; }
+  });
+}
+
+// ── QUBIT REGISTER ────────────────────────────────────────────────────────
+function initQubits() {
+  const c=document.getElementById('qubitRegister');
+  c.innerHTML=Array(8).fill(0).map((_,i)=>`<div class="qstate-bit off" id="qbit${i}">0</div>`).join('');
+}
+
+function updateQubits() {
+  if(Math.random()<0.1){
+    const i=Math.floor(Math.random()*8);
+    state.qubits[i] = state.qubits[i]===0?1:0;
+  }
+  state.qubits.forEach((v,i)=>{
+    const el=document.getElementById(`qbit${i}`);
+    if(el){
+      el.className='qstate-bit '+(v?'on':'off');
+      el.textContent=v;
+    }
+  });
+}
+
+// ── EVENT LOG ─────────────────────────────────────────────────────────────
+const LOG_MESSAGES=[
+  ['cyan',  'Quantum entanglement stabilized at {freq} Hz'],
+  ['green', 'Coherence peak detected: {coh}%'],
+  ['amber', 'Phase variance +{mod}° — compensating'],
+  ['cyan',  'Zero-point energy flux normalized'],
+  ['green', 'Torsion field vector locked'],
+  ['amber', 'Biophoton emission surge detected'],
+  ['cyan',  'Scalar field resonance achieved'],
+  ['red',   'Warning: dimensional bleed-through @ {freq} Hz'],
+  ['green', 'Alpha wave sync: {coh}%'],
+  ['cyan',  'Planck resonance harmonic detected'],
+];
+
+function addLog() {
+  const [cls, msg] = LOG_MESSAGES[Math.floor(Math.random()*LOG_MESSAGES.length)];
+  const text = msg
+    .replace('{freq}', state.freq.toFixed(1))
+    .replace('{coh}',  state.coherences[0].toFixed(1))
+    .replace('{mod}',  (state.mod*100).toFixed(0));
+  const ts = new Date().toISOString().split('T')[1].slice(0,8);
+  const container = document.getElementById('eventLog');
+  const el = document.createElement('div');
+  el.className=`log-entry log-${cls}`;
+  el.textContent=`[${ts}] ${text}`;
+  container.prepend(el);
+  const entries=container.querySelectorAll('.log-entry');
+  if(entries.length>12) entries[entries.length-1].remove();
+}
+
+// ── UPDATE ENTANGLEMENT MATRIX ────────────────────────────────────────────
+function updateEntanglement() {
+  const n=8;
+  for(let i=0;i<n;i++){
+    for(let j=0;j<n;j++){
+      const target = i===j ? 0.9+0.1*Math.abs(Math.sin(state.t*0.02+i)) :
+        Math.abs(Math.sin(state.t*0.01+i*0.7)*Math.cos(state.t*0.008+j*0.5));
+      state.entangleMatrix[i][j] = lerp(state.entangleMatrix[i][j], target, 0.05);
+    }
+  }
+}
+
+// ── HEADER UPDATES ────────────────────────────────────────────────────────
+function updateHeader() {
+  document.getElementById('hFreq').textContent = state.freq.toFixed(2)+' Hz';
+  document.getElementById('hCoherence').textContent = state.coherences[0].toFixed(1)+'%';
+  const ph=(state.phase*180/Math.PI)%360;
+  document.getElementById('hPhase').textContent = 'Φ '+ph.toFixed(2)+'°';
+  document.getElementById('dialReadout').textContent = state.freq.toFixed(2);
+}
+
+// ── MAIN LOOP ─────────────────────────────────────────────────────────────
+let lastLog=0;
+function tick(ts) {
+  if(!state.frozen){
+    state.t += 1;
+    state.phase += 0.03 + state.freq*0.0001;
+    state.lissPhase += 0.008;
+    if(state.waterfallRows.length<waterfallEl.height || state.t%2===0) updateWaterfall();
+  }
+
+  drawScope();
+  drawSpectrogram();
+  drawLissajous();
+  updateEntanglement();
+  drawEntanglement();
+  drawWaterfall();
+  drawAtom();
+  drawDial();
+  drawRadar();
+  updateMetrics();
+  updateCoherence();
+  updateQubits();
+  updateHeader();
+
+  if(state.t - lastLog > 120 && !state.frozen){
+    addLog();
+    lastLog=state.t;
+    // randomize radar blip
+    const i=Math.floor(Math.random()*state.radarData.length);
+    state.radarData[i]=rnd(0.3,0.95);
+    // shift radar angle for blip
+    state.radarData[i]=rnd(0.3,0.95);
+  }
+
+  requestAnimationFrame(tick);
+}
+
+// ── CONTROLS ──────────────────────────────────────────────────────────────
+document.getElementById('modeControls').querySelectorAll('.btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#modeControls .btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.mode=btn.dataset.mode;
+    addLog();
+  });
+});
+
+document.getElementById('profileControls').querySelectorAll('.btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#profileControls .btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    state.profile=btn.dataset.profile;
+  });
+});
+
+const ampSlider=document.getElementById('ampSlider');
+const freqSlider=document.getElementById('freqSlider');
+const modSlider=document.getElementById('modSlider');
+
+ampSlider.addEventListener('input',()=>{
+  state.amp=ampSlider.value/100;
+  document.getElementById('ampVal').textContent=ampSlider.value+'%';
+});
+freqSlider.addEventListener('input',()=>{
+  state.freq=+freqSlider.value;
+  document.getElementById('freqVal').textContent=freqSlider.value+' Hz';
+});
+modSlider.addEventListener('input',()=>{
+  state.mod=modSlider.value/100;
+  document.getElementById('modVal').textContent=modSlider.value+'%';
+});
+
+document.getElementById('btnFreeze').addEventListener('click',()=>{
+  state.frozen=!state.frozen;
+  const btn=document.getElementById('btnFreeze');
+  btn.textContent=state.frozen?'▶ RESUME':'❚❚ FREEZE';
+  btn.classList.toggle('active',state.frozen);
+});
+
+document.getElementById('btnReset').addEventListener('click',()=>{
+  state.t=0;state.phase=0;state.lissPhase=0;
+  state.waterfallRows=[];state.particles=[];
+  addLog();
+});
+
+document.getElementById('btnCapture').addEventListener('click',()=>{
+  const btn=document.getElementById('btnCapture');
+  btn.classList.add('active');
+  btn.textContent='✓ CAPTURED';
+  setTimeout(()=>{btn.classList.remove('active');btn.textContent='⊡ CAPTURE';},1500);
+  addLog();
+});
+
+document.getElementById('btnBoost').addEventListener('click',()=>{
+  const btn=document.getElementById('btnBoost');
+  state.boost = state.boost===1?2:1;
+  btn.classList.toggle('active',state.boost===2);
+  btn.textContent = state.boost===2?'↑ BOOSTED':'↑ BOOST';
+});
+
+// Dial drag
+let dialDragging=false, dialStartAngle=0, dialStartFreq=0;
+dialEl.addEventListener('mousedown',e=>{
+  dialDragging=true;
+  const r=dialEl.getBoundingClientRect();
+  dialStartAngle=Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2));
+  dialStartFreq=state.freq;
+  dialEl.style.cursor='grabbing';
+});
+window.addEventListener('mousemove',e=>{
+  if(!dialDragging)return;
+  const r=dialEl.getBoundingClientRect();
+  const a=Math.atan2(e.clientY-(r.top+r.height/2), e.clientX-(r.left+r.width/2));
+  const delta=(a-dialStartAngle)*(180/Math.PI);
+  state.freq=clamp(dialStartFreq+delta*2, 1, 1000);
+  freqSlider.value=Math.round(state.freq);
+  document.getElementById('freqVal').textContent=Math.round(state.freq)+' Hz';
+});
+window.addEventListener('mouseup',()=>{dialDragging=false;dialEl.style.cursor='grab';});
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+initCoherence();
+initQubits();
+addLog();
+addLog();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
