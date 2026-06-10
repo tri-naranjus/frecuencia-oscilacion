@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Analizador de Resonancia Cuántica — QRA-9000</title>
+<title>QRA-9000 • Analizador de Resonancia Cuántica + Entropía Shannon</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 
@@ -30,7 +30,6 @@ body {
   user-select: none;
 }
 
-/* ── SCANLINES ── */
 body::before {
   content:'';
   position:fixed;
@@ -40,7 +39,24 @@ body::before {
   z-index:999;
 }
 
-/* ── HEADER ── */
+/* GLITCH EFFECT */
+body.glitch::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255,51,85,.03),
+    rgba(255,51,85,.03) 2px,
+    transparent 2px,
+    transparent 4px
+  );
+  animation: glitch-flicker .15s infinite;
+  z-index:998;
+  pointer-events:none;
+}
+@keyframes glitch-flicker { 0%,100%{opacity:0;} 50%{opacity:1;} }
+
 header {
   display:flex;
   align-items:center;
@@ -74,7 +90,7 @@ header {
 .logo-text p  { font-size:.55rem; letter-spacing:.2em; color:var(--text2); }
 
 .header-status {
-  display:flex; gap:20px; align-items:center;
+  display:flex; gap:15px; align-items:center;
 }
 .status-item {
   display:flex;flex-direction:column;align-items:center;gap:2px;
@@ -84,6 +100,8 @@ header {
 .status-value.cyan  { color:var(--cyan);  text-shadow:0 0 8px var(--cyan); }
 .status-value.green { color:var(--green); text-shadow:0 0 8px var(--green); }
 .status-value.amber { color:var(--amber); text-shadow:0 0 8px var(--amber); }
+.status-value.red   { color:var(--red);   text-shadow:0 0 8px var(--red); animation:pulse-danger 1s ease-in-out infinite; }
+@keyframes pulse-danger { 0%,100%{opacity:.7;} 50%{opacity:1;} }
 
 .header-alert {
   font-size:.6rem; letter-spacing:.2em;
@@ -93,7 +111,6 @@ header {
 }
 @keyframes blink {50%{opacity:0;}}
 
-/* ── GRID LAYOUT ── */
 .grid {
   display:grid;
   grid-template-columns: 260px 1fr 260px;
@@ -104,7 +121,6 @@ header {
   margin:0 auto;
 }
 
-/* ── PANEL BASE ── */
 .panel {
   background: var(--panel);
   border:1px solid var(--border);
@@ -142,19 +158,17 @@ header {
 .badge-active { background:rgba(0,255,136,.15); color:var(--green); border:1px solid rgba(0,255,136,.3); }
 .badge-live   { background:rgba(0,229,255,.15); color:var(--cyan);  border:1px solid rgba(0,229,255,.3); }
 .badge-warn   { background:rgba(255,170,0,.15); color:var(--amber); border:1px solid rgba(255,170,0,.3); }
+.badge-danger { background:rgba(255,51,85,.2);  color:var(--red);   border:1px solid rgba(255,51,85,.5); animation:pulse-badge 1s ease-in-out infinite; }
+@keyframes pulse-badge { 0%,100%{box-shadow:none;} 50%{box-shadow:0 0 8px rgba(255,51,85,.4);} }
 
-/* ── LEFT COLUMN ── */
 .col-left { display:flex; flex-direction:column; gap:10px; }
 
-/* Orbital atom display */
 .atom-container {
   display:flex; align-items:center; justify-content:center;
   height:180px;
   position:relative;
 }
-#atomCanvas { position:absolute; }
 
-/* Metrics list */
 .metric-row {
   display:flex; justify-content:space-between; align-items:center;
   padding:5px 0;
@@ -167,11 +181,9 @@ header {
 .metric-bar-wrap { width:70px; height:4px; background:var(--dim); border-radius:2px; overflow:hidden; }
 .metric-bar { height:100%; border-radius:2px; transition:width .5s ease; }
 
-/* Frequency dial */
 .dial-wrap {
   display:flex; flex-direction:column; align-items:center; gap:6px;
 }
-#dialCanvas { cursor:grab; }
 .dial-readout {
   font-size:1.4rem;
   letter-spacing:.1em;
@@ -181,41 +193,59 @@ header {
 }
 .dial-unit { font-size:.5rem; color:var(--text2); letter-spacing:.2em; }
 
-/* ── CENTER COLUMN ── */
 .col-center { display:flex; flex-direction:column; gap:10px; }
 .main-scope {
   height:200px;
   position:relative;
   background: radial-gradient(ellipse at center, #051020 0%, var(--panel) 100%);
 }
-#scopeCanvas { width:100%; height:100%; }
 
-.spectrogram-wrap {
-  height:120px;
+.entropy-panel {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:8px;
+  background:linear-gradient(135deg, rgba(255,51,85,.05) 0%, rgba(176,96,255,.05) 100%);
+  border-radius:3px;
+  border-left:3px solid var(--red);
+}
+.entropy-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:.65rem;
+}
+.entropy-label { color:var(--text2); letter-spacing:.1em; }
+.entropy-val { color:var(--amber); font-weight:bold; text-shadow:0 0 8px var(--amber); }
+
+.bekenstein-bar {
   position:relative;
+  height:12px;
+  background:var(--dim);
+  border-radius:3px;
+  overflow:hidden;
+  border:1px solid rgba(255,51,85,.3);
 }
-#spectroCanvas { width:100%; height:100%; }
-
-.lissajous-row {
-  display:flex; gap:10px;
+.bekenstein-fill {
+  height:100%;
+  background:linear-gradient(90deg, #00ff88, #ffaa00, #ff3355);
+  border-radius:2px;
+  transition:width .8s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 8px currentColor;
 }
-.lissajous-wrap { flex:1; height:160px; display:flex;align-items:center;justify-content:center; }
+.bekenstein-limit {
+  position:absolute;
+  right:0;
+  top:0;
+  width:2px;
+  height:100%;
+  background:#ff3355;
+  box-shadow:0 0 10px #ff3355;
+  z-index:10;
+}
 
-/* ── WATERFALL ── */
-.waterfall-wrap { height:120px; position:relative; overflow:hidden; }
-#waterfallCanvas { width:100%; height:100%; }
-
-/* ── RIGHT COLUMN ── */
 .col-right { display:flex; flex-direction:column; gap:10px; }
 
-/* Radar */
-.radar-wrap {
-  display:flex; align-items:center; justify-content:center;
-  height:180px;
-}
-#radarCanvas {}
-
-/* Coherence bars */
 .coherence-item {
   margin-bottom:8px;
 }
@@ -233,7 +263,6 @@ header {
   transition: width .8s cubic-bezier(.4,0,.2,1);
 }
 
-/* Event log */
 .event-log {
   height:110px;
   overflow:hidden;
@@ -254,14 +283,12 @@ header {
 .log-amber  { color:rgba(255,170,0,.8); border-color:var(--amber); }
 .log-red    { color:rgba(255,51,85,.8); border-color:var(--red); }
 
-/* ── BOTTOM BAR ── */
 .bottom-bar {
   grid-column: 1/-1;
   display:flex; gap:10px;
 }
 .bottom-bar .panel { flex:1; }
 
-/* Buttons */
 .controls {
   display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;
 }
@@ -283,7 +310,6 @@ header {
 .btn.danger { border-color:var(--red); color:var(--red); }
 .btn.danger:hover { background:rgba(255,51,85,.1); box-shadow:0 0 8px rgba(255,51,85,.3); }
 
-/* Sliders */
 .slider-row { display:flex; align-items:center; gap:8px; margin-top:6px; font-size:.6rem; }
 .slider-label { color:var(--text2); width:80px; letter-spacing:.1em; flex-shrink:0; }
 input[type=range] {
@@ -304,7 +330,6 @@ input[type=range]::-webkit-slider-thumb {
 }
 .slider-val { color:var(--cyan); width:50px; text-align:right; letter-spacing:.05em; }
 
-/* Quantum state indicator */
 .qstate {
   display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;
 }
@@ -322,34 +347,27 @@ input[type=range]::-webkit-slider-thumb {
   color:var(--cyan);
   box-shadow:0 0 8px rgba(0,229,255,.4);
 }
-.qstate-bit.off { color:var(--dim); }
 
-/* Entanglement matrix */
-#entanglementCanvas {}
-
-/* Particle canvas overlay on main scope */
-#particleCanvas {
-  position:absolute;
-  top:0;left:0;
-  pointer-events:none;
-}
-
-.no-data { color:var(--text2); font-size:.6rem; text-align:center; padding:20px; letter-spacing:.1em; }
-
-/* Responsive */
 @media(max-width:1100px){
   .grid { grid-template-columns: 1fr 1fr; }
   .col-left, .col-right { display:contents; }
 }
 @media(max-width:700px){
   .grid { grid-template-columns: 1fr; }
-  .lissajous-row { flex-direction:column; }
+}
+
+.equation {
+  font-size:.5rem;
+  color:var(--text2);
+  letter-spacing:.05em;
+  font-style:italic;
+  margin-top:4px;
+  line-height:1.4;
 }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
   <div class="logo">
     <div class="logo-icon">
@@ -362,130 +380,131 @@ input[type=range]::-webkit-slider-thumb {
     </div>
     <div class="logo-text">
       <h1>Analizador de Resonancia Cuántica</h1>
-      <p>QRA-9000 · SERIE IV · EDICIÓN CAMPO PROFUNDO</p>
+      <p>QRA-9000 • ENTROPÍA SHANNON + BEKENSTEIN</p>
     </div>
   </div>
   <div class="header-status">
     <div class="status-item">
-      <span class="status-label">FREQ</span>
-      <span class="status-value cyan" id="hFreq">432.00 Hz</span>
+      <span class="status-label">ENTROPÍA</span>
+      <span class="status-value amber" id="hEntropy">0.00 bits</span>
     </div>
     <div class="status-item">
-      <span class="status-label">COHERENCIA</span>
-      <span class="status-value green" id="hCoherence">98.7%</span>
+      <span class="status-label">% LÍMITE</span>
+      <span class="status-value" id="hBekenPercent" style="color:var(--green)">12%</span>
     </div>
     <div class="status-item">
-      <span class="status-label">FASE</span>
-      <span class="status-value amber" id="hPhase">Φ 0.00°</span>
-    </div>
-    <div class="status-item">
-      <span class="status-label">ENTRELAZ.</span>
-      <span class="status-value cyan" id="hEntangle">ACTIVO</span>
+      <span class="status-label">ESTADO</span>
+      <span class="status-value green" id="hCollapseState">ESTABLE</span>
     </div>
   </div>
   <div class="header-alert">● SISTEMA EN LÍNEA</div>
 </header>
 
-<!-- MAIN GRID -->
 <div class="grid">
 
-  <!-- LEFT COL -->
   <div class="col-left">
-
-    <!-- Atom display -->
     <div class="panel">
-      <div class="panel-title">VISUALIZADOR ESTADO CUÁNTICO <span class="panel-badge badge-active">ACTIVO</span></div>
+      <div class="panel-title">ESTADO CUÁNTICO <span class="panel-badge badge-active">ACTIVO</span></div>
       <div class="atom-container">
         <canvas id="atomCanvas" width="220" height="160"></canvas>
       </div>
     </div>
 
-    <!-- Metrics -->
     <div class="panel">
       <div class="panel-title">MÉTRICAS DE CAMPO <span class="panel-badge badge-live">EN VIVO</span></div>
       <div id="metricsContainer"></div>
     </div>
 
-    <!-- Dial -->
     <div class="panel">
       <div class="panel-title">FRECUENCIA DE RESONANCIA</div>
       <div class="dial-wrap">
         <canvas id="dialCanvas" width="180" height="180"></canvas>
         <div class="dial-readout" id="dialReadout">432.00</div>
-        <div class="dial-unit">HERTZ · SINTONIZADO CUÁNTICO</div>
+        <div class="dial-unit">HERTZ • CUÁNTICO</div>
       </div>
     </div>
-
   </div>
 
-  <!-- CENTER COL -->
   <div class="col-center">
-
-    <!-- Main oscilloscope -->
     <div class="panel main-scope" id="scopePanel">
-      <div class="panel-title">OSCILOSCOPIO FORMA DE ONDA CUÁNTICA <span class="panel-badge badge-live">EN VIVO</span></div>
+      <div class="panel-title">OSCILOSCOPIO CUÁNTICO <span class="panel-badge badge-live">EN VIVO</span></div>
       <canvas id="scopeCanvas"></canvas>
       <canvas id="particleCanvas"></canvas>
     </div>
 
-    <!-- Spectrogram -->
-    <div class="panel spectrogram-wrap">
-      <div class="panel-title">ANÁLISIS DENSIDAD ESPECTRAL <span class="panel-badge badge-live">EN VIVO</span></div>
-      <canvas id="spectroCanvas"></canvas>
+    <div class="panel entropy-panel">
+      <div class="panel-title" style="margin-bottom:6px;color:var(--amber);border-color:var(--red)">⚠ ENTROPÍA SHANNON & LÍMITE BEKENSTEIN ⚠ <span class="panel-badge badge-danger">CRÍTICO</span></div>
+
+      <div class="entropy-row">
+        <span class="entropy-label">Entropía Shannon:</span>
+        <span class="entropy-val" id="entropyVal">0.00</span>
+        <span class="entropy-label">bits</span>
+      </div>
+
+      <div>
+        <div style="font-size:.55rem; color:var(--text2); margin-bottom:3px;">Límite Bekenstein: <span id="bekenMaxVal" style="color:var(--amber)">100.0</span> bits/unidad</div>
+        <div class="bekenstein-bar">
+          <div class="bekenstein-fill" id="bekenFill"></div>
+          <div class="bekenstein-limit"></div>
+        </div>
+      </div>
+
+      <div class="entropy-row">
+        <span class="entropy-label">Densidad de Información:</span>
+        <span class="entropy-val" id="infoDensity">0.0%</span>
+      </div>
+
+      <div class="entropy-row">
+        <span class="entropy-label">ALERTA COLAPSO:</span>
+        <span class="entropy-val" id="collapseAlert" style="color:var(--green)">NULO</span>
+      </div>
+
+      <div class="equation" id="eqDisplay">
+        S = -Σ pᵢ·log₂(pᵢ) | Lím. Bek. = c³A/4ℏG
+      </div>
     </div>
 
-    <!-- Lissajous + Entanglement -->
-    <div class="lissajous-row">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div class="panel lissajous-wrap" style="flex-direction:column;gap:6px;justify-content:flex-start;padding:10px;">
-        <div class="panel-title" style="width:100%">FIGURA DE LISSAJOUS <span class="panel-badge badge-active">XY</span></div>
+        <div class="panel-title" style="width:100%;margin-bottom:4px;">FIGURA LISSAJOUS <span class="panel-badge badge-active">XY</span></div>
         <canvas id="lissajousCanvas" width="200" height="130"></canvas>
       </div>
       <div class="panel lissajous-wrap" style="flex-direction:column;gap:6px;justify-content:flex-start;padding:10px;">
-        <div class="panel-title" style="width:100%">MATRIZ ENTRELAZAMIENTO <span class="panel-badge badge-active">8Q</span></div>
+        <div class="panel-title" style="width:100%;margin-bottom:4px;">MATRIZ ENTRELAZAMIENTO <span class="panel-badge badge-active">8Q</span></div>
         <canvas id="entanglementCanvas" width="200" height="130"></canvas>
       </div>
     </div>
 
-    <!-- Waterfall -->
-    <div class="panel waterfall-wrap">
-      <div class="panel-title">CASCADA DE FRECUENCIAS <span class="panel-badge badge-live">EN VIVO</span></div>
-      <canvas id="waterfallCanvas"></canvas>
+    <div class="panel spectrogram-wrap" style="height:100px;">
+      <div class="panel-title">ANÁLISIS ESPECTRAL <span class="panel-badge badge-live">EN VIVO</span></div>
+      <canvas id="spectroCanvas"></canvas>
     </div>
-
   </div>
 
-  <!-- RIGHT COL -->
   <div class="col-right">
-
-    <!-- Radar -->
     <div class="panel">
-      <div class="panel-title">RADAR CAMPO CUÁNTICO <span class="panel-badge badge-live">BARRIDO</span></div>
-      <div class="radar-wrap">
+      <div class="panel-title">RADAR CUÁNTICO <span class="panel-badge badge-live">BARRIDO</span></div>
+      <div class="radar-wrap" style="height:180px;display:flex;align-items:center;justify-content:center;">
         <canvas id="radarCanvas" width="220" height="160"></canvas>
       </div>
     </div>
 
-    <!-- Coherence bars -->
     <div class="panel">
       <div class="panel-title">COHERENCIA DIMENSIONAL <span class="panel-badge badge-warn">MONITOR</span></div>
       <div id="coherenceContainer"></div>
     </div>
 
-    <!-- Quantum bits -->
     <div class="panel">
       <div class="panel-title">REGISTRO QUBIT <span class="panel-badge badge-active">|ψ⟩</span></div>
       <div class="qstate" id="qubitRegister"></div>
     </div>
 
-    <!-- Event log -->
     <div class="panel">
-      <div class="panel-title">REGISTRO DE EVENTOS CUÁNTICOS</div>
+      <div class="panel-title">EVENTOS CUÁNTICOS</div>
       <div class="event-log" id="eventLog"></div>
     </div>
-
   </div>
 
-  <!-- BOTTOM BAR -->
   <div class="bottom-bar">
     <div class="panel" style="flex:2">
       <div class="panel-title">CONTROLES DE SEÑAL</div>
@@ -537,6 +556,11 @@ input[type=range]::-webkit-slider-thumb {
 </div>
 
 <script>
+// ── CONSTANTS ──────────────────────────────────────────────────────────────
+const BEKENSTEIN_LIMIT = 100; // bits máximo permitido (límite de información)
+const COLLAPSE_THRESHOLD = 0.85; // Cuando % > 85% empieza el colapso
+const CRITICAL_THRESHOLD = 0.95; // Cuando % > 95% es crítico
+
 // ── STATE ──────────────────────────────────────────────────────────────────
 const state = {
   freq: 432,
@@ -569,15 +593,19 @@ const state = {
   lissPhase: 0,
   entangleMatrix: Array(8).fill(null).map(()=>Array(8).fill(Math.random())),
   logEntries: [],
+  // ENTROPÍA
+  entropy: 0,
+  entropySamples: [],
+  collapseIntensity: 0,
+  isCollapsing: false,
 };
 
-// ── CANVAS REFS ───────────────────────────────────────────────────────────
+// ── CANVAS REFS ────────────────────────────────────────────────────────────
 const scopeEl      = document.getElementById('scopeCanvas');
 const particleEl   = document.getElementById('particleCanvas');
 const spectroEl    = document.getElementById('spectroCanvas');
 const lissEl       = document.getElementById('lissajousCanvas');
 const entEl        = document.getElementById('entanglementCanvas');
-const waterfallEl  = document.getElementById('waterfallCanvas');
 const atomEl       = document.getElementById('atomCanvas');
 const dialEl       = document.getElementById('dialCanvas');
 const radarEl      = document.getElementById('radarCanvas');
@@ -587,7 +615,6 @@ const particleCtx  = particleEl.getContext('2d');
 const spectroCtx   = spectroEl.getContext('2d');
 const lissCtx      = lissEl.getContext('2d');
 const entCtx       = entEl.getContext('2d');
-const wfCtx        = waterfallEl.getContext('2d');
 const atomCtx      = atomEl.getContext('2d');
 const dialCtx      = dialEl.getContext('2d');
 const radarCtx     = radarEl.getContext('2d');
@@ -601,22 +628,40 @@ function resizeCanvases() {
   particleEl.height = scopeEl.height;
   spectroEl.width   = spectroEl.parentElement.offsetWidth - 20;
   spectroEl.height  = spectroEl.parentElement.offsetHeight - 34;
-  waterfallEl.width  = waterfallEl.parentElement.offsetWidth - 20;
-  waterfallEl.height = waterfallEl.parentElement.offsetHeight - 34;
 }
 resizeCanvases();
 window.addEventListener('resize', resizeCanvases);
 
-// ── HELPERS ───────────────────────────────────────────────────────────────
+// ── HELPERS ────────────────────────────────────────────────────────────────
 const rnd  = (a,b) => a + Math.random()*(b-a);
 const clamp= (v,a,b) => Math.max(a,Math.min(b,v));
 const lerp = (a,b,t) => a + (b-a)*t;
 
-function hexToRgba(hex, a) {
-  const r = parseInt(hex.slice(1,3),16);
-  const g = parseInt(hex.slice(3,5),16);
-  const b = parseInt(hex.slice(5,7),16);
-  return `rgba(${r},${g},${b},${a})`;
+// ── ENTROPÍA SHANNON ───────────────────────────────────────────────────────
+function calculateShannon() {
+  // Calcular distribución espectral basada en la onda actual
+  const samples = 64;
+  const spectrum = new Array(samples).fill(0);
+
+  for(let i=0; i<samples; i++){
+    const t = state.t - (i*2);
+    const wave = sampleWave(t, state.freq, state.amp, state.mod, state.mode);
+    spectrum[i] = Math.abs(wave);
+  }
+
+  // Normalizar
+  const sum = spectrum.reduce((a,b)=>a+b,0);
+  const normalized = spectrum.map(v => v/sum);
+
+  // Shannon entropy: -Σ p_i * log2(p_i)
+  let entropy = 0;
+  normalized.forEach(p => {
+    if(p > 0) entropy -= p * Math.log2(p);
+  });
+
+  // Escalar a bits (0-100)
+  entropy = clamp(entropy * BEKENSTEIN_LIMIT / Math.log2(samples), 0, BEKENSTEIN_LIMIT);
+  return entropy;
 }
 
 // ── WAVEFORM GENERATOR ────────────────────────────────────────────────────
@@ -674,7 +719,7 @@ function updateParticles() {
   });
 }
 
-// ── DRAW OSCILLOSCOPE ─────────────────────────────────────────────────────
+// ── DRAW SCOPE WITH DISTORTION ────────────────────────────────────────────
 function drawScope() {
   const W = scopeEl.width, H = scopeEl.height;
   const ctx = scopeCtx;
@@ -697,7 +742,10 @@ function drawScope() {
 
   if(state.frozen) return;
 
-  // glow wave (thick)
+  // wave con efecto de distorsión según la entropía
+  const pctCollapse = state.entropy / BEKENSTEIN_LIMIT;
+  const distortion = pctCollapse > COLLAPSE_THRESHOLD ? (pctCollapse - COLLAPSE_THRESHOLD) * 20 : 0;
+
   const drawWave = (offset, alpha, width, color) => {
     ctx.strokeStyle = color || `rgba(0,229,255,${alpha})`;
     ctx.lineWidth = width;
@@ -706,7 +754,14 @@ function drawScope() {
     ctx.beginPath();
     for(let x=0;x<W;x++){
       const t = state.t - (W-x)*0.5 + offset;
-      const y = H/2 - sampleWave(t, state.freq, state.amp*(H*0.42), state.mod, state.mode);
+      let y = H/2 - sampleWave(t, state.freq, state.amp*(H*0.42), state.mod, state.mode);
+
+      // Distorsión cerca del colapso
+      if(distortion > 0) {
+        const warp = Math.sin(x*0.02 + state.t*0.1) * distortion;
+        y += warp;
+      }
+
       x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
     }
     ctx.stroke();
@@ -722,7 +777,25 @@ function drawScope() {
     drawWave(-5,.3, 1, 'rgba(176,96,255,.5)');
   }
 
-  // particles
+  // EFECTO DE COLAPSO
+  if(pctCollapse > CRITICAL_THRESHOLD) {
+    const intensity = (pctCollapse - CRITICAL_THRESHOLD) / (1 - CRITICAL_THRESHOLD);
+    ctx.fillStyle = `rgba(255,51,85,${intensity*0.3})`;
+    ctx.fillRect(0,0,W,H);
+
+    // Distorsión ondulatoria
+    for(let i=0; i<5; i++) {
+      ctx.strokeStyle = `rgba(255,51,85,${intensity*0.2})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for(let x=0; x<W; x++) {
+        const y = H/2 + Math.sin(x*0.01+state.t*0.2+i*0.5)*H*0.15*intensity;
+        x===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+  }
+
   updateParticles();
   particleCtx.clearRect(0,0,W,H);
   state.particles.forEach(p => {
@@ -738,16 +811,15 @@ function drawScope() {
   particleCtx.shadowBlur = 0;
 }
 
-// ── DRAW SPECTROGRAM ──────────────────────────────────────────────────────
+// ── DRAW SPECTROGRAM ────────────────────────────────────────────────────
 function drawSpectrogram() {
   const W = spectroEl.width, H = spectroEl.height;
   const ctx = spectroCtx;
   ctx.clearRect(0,0,W,H);
 
-  const bars = 80;
+  const bars = Math.floor(W);
   const bw = W/bars;
   for(let i=0;i<bars;i++){
-    const baseFreq = (i/bars) * state.freq * 3;
     const t = state.t * 0.02;
     let v = 0;
     switch(state.mode){
@@ -802,7 +874,7 @@ function drawLissajous() {
   ctx.shadowBlur=0;
 }
 
-// ── DRAW ENTANGLEMENT MATRIX ──────────────────────────────────────────────
+// ── DRAW ENTANGLEMENT ──────────────────────────────────────────────────
 function drawEntanglement() {
   const W = entEl.width, H = entEl.height;
   const ctx = entCtx;
@@ -826,37 +898,7 @@ function drawEntanglement() {
   }
 }
 
-// ── DRAW WATERFALL ────────────────────────────────────────────────────────
-function updateWaterfall() {
-  const W = waterfallEl.width;
-  const bars = W;
-  const row = [];
-  for(let i=0;i<bars;i++){
-    const t = state.t*0.02;
-    let v = Math.abs(Math.sin(i*state.freq*0.003+t)*Math.sin(i*0.05));
-    v = clamp(v*state.amp*state.boost,0,1);
-    row.push(v);
-  }
-  state.waterfallRows.unshift(row);
-  if(state.waterfallRows.length > waterfallEl.height) state.waterfallRows.pop();
-}
-
-function drawWaterfall() {
-  const W=waterfallEl.width, H=waterfallEl.height;
-  const ctx=wfCtx;
-  ctx.clearRect(0,0,W,H);
-  for(let r=0;r<Math.min(state.waterfallRows.length,H);r++){
-    const row=state.waterfallRows[r];
-    for(let i=0;i<row.length;i++){
-      const v=row[i];
-      const hue=200+v*120;
-      ctx.fillStyle=`hsla(${hue},100%,${30+v*50}%,${v*0.9+0.05})`;
-      ctx.fillRect(i,r,1,1);
-    }
-  }
-}
-
-// ── DRAW ATOM ─────────────────────────────────────────────────────────────
+// ── DRAW ATOM ───────────────────────────────────────────────────────────
 function drawAtom() {
   const W=atomEl.width, H=atomEl.height;
   const ctx=atomCtx;
@@ -872,34 +914,27 @@ function drawAtom() {
   const electronAngles=[t*1.2, t*0.8, t*1.5];
 
   orbits.forEach((o,oi)=>{
-    // orbit ellipse
     ctx.save();
     ctx.translate(cx,cy);
     ctx.rotate(o.tilt*Math.PI/180);
     ctx.beginPath();
     ctx.ellipse(0,0,o.rx,o.ry,0,0,Math.PI*2);
-    ctx.strokeStyle=hexToRgba(o.color,.25);
+    ctx.strokeStyle=`rgba(${o.color==='#00e5ff'?'0,229,255':o.color==='#00ff88'?'0,255,136':'176,96,255'},.25)`;
     ctx.lineWidth=1;
     ctx.stroke();
 
-    // electron
     const ex=o.rx*Math.cos(electronAngles[oi]);
     const ey=o.ry*Math.sin(electronAngles[oi]);
-    const grd=ctx.createRadialGradient(ex,ey,0,ex,ey,5);
-    grd.addColorStop(0,o.color);
-    grd.addColorStop(1,'transparent');
-    ctx.fillStyle=grd;
+    ctx.fillStyle=o.color;
     ctx.shadowColor=o.color;
     ctx.shadowBlur=10;
     ctx.beginPath();
     ctx.arc(ex,ey,3,0,Math.PI*2);
-    ctx.fillStyle=o.color;
     ctx.fill();
     ctx.shadowBlur=0;
     ctx.restore();
   });
 
-  // nucleus
   const pulse=1+0.1*Math.sin(t*8);
   const ngrd=ctx.createRadialGradient(cx,cy,0,cx,cy,12*pulse);
   ngrd.addColorStop(0,'rgba(0,229,255,1)');
@@ -914,19 +949,17 @@ function drawAtom() {
   ctx.shadowBlur=0;
 }
 
-// ── DRAW DIAL ─────────────────────────────────────────────────────────────
+// ── DRAW DIAL ──────────────────────────────────────────────────────────
 function drawDial() {
   const W=dialEl.width, H=dialEl.height;
   const ctx=dialCtx;
   ctx.clearRect(0,0,W,H);
   const cx=W/2, cy=H/2, r=80;
 
-  // outer ring
   ctx.strokeStyle='rgba(0,58,90,.6)';
   ctx.lineWidth=2;
   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
 
-  // tick marks
   for(let i=0;i<60;i++){
     const a=(i/60)*Math.PI*2 - Math.PI/2;
     const isMaj = i%5===0;
@@ -939,14 +972,12 @@ function drawDial() {
     ctx.stroke();
   }
 
-  // arc fill based on freq
   const pct = clamp(state.freq/1000, 0, 1);
   const startA=-Math.PI/2, endA=startA+pct*Math.PI*2;
   ctx.strokeStyle='rgba(0,229,255,.1)';
   ctx.lineWidth=8;
   ctx.beginPath();ctx.arc(cx,cy,r-20,startA,startA+Math.PI*2);ctx.stroke();
 
-  const grd=ctx.createConicalGradient?null:null;
   ctx.strokeStyle=`rgba(0,229,255,.8)`;
   ctx.lineWidth=6;
   ctx.shadowColor='#00e5ff';
@@ -955,7 +986,6 @@ function drawDial() {
   ctx.beginPath();ctx.arc(cx,cy,r-20,startA,endA);ctx.stroke();
   ctx.shadowBlur=0;
 
-  // needle
   const needleA=startA+pct*Math.PI*2;
   ctx.strokeStyle='#00e5ff';
   ctx.lineWidth=2;
@@ -967,36 +997,30 @@ function drawDial() {
   ctx.stroke();
   ctx.shadowBlur=0;
 
-  // center dot
   ctx.fillStyle='#00e5ff';
   ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fill();
 }
 
-// ── DRAW RADAR ────────────────────────────────────────────────────────────
+// ── DRAW RADAR ────────────────────────────────────────────────────────
 function drawRadar() {
   const W=radarEl.width, H=radarEl.height;
   const ctx=radarCtx;
   ctx.clearRect(0,0,W,H);
   const cx=W/2, cy=H/2, r=Math.min(cx,cy)-10;
 
-  // rings
   for(let i=1;i<=4;i++){
     ctx.strokeStyle=`rgba(0,58,90,${.3+i*.05})`;
     ctx.lineWidth=.5;
     ctx.beginPath();ctx.arc(cx,cy,r*(i/4),0,Math.PI*2);ctx.stroke();
   }
-  // cross lines
   ctx.strokeStyle='rgba(0,58,90,.4)';
   for(let i=0;i<6;i++){
     const a=i*Math.PI/6;
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));ctx.stroke();
   }
 
-  // sweep
   state.radarSweep += 0.02;
   const sw=state.radarSweep;
-  const grd=ctx.createConicalGradient?ctx.createConicalGradient(cx,cy,sw):null;
-  // fallback sweep arc
   ctx.save();
   ctx.translate(cx,cy);
   ctx.rotate(sw);
@@ -1011,7 +1035,6 @@ function drawRadar() {
   ctx.fill();
   ctx.restore();
 
-  // sweep line
   ctx.strokeStyle='rgba(0,229,255,.8)';
   ctx.lineWidth=1.5;
   ctx.shadowColor='#00e5ff';
@@ -1022,7 +1045,6 @@ function drawRadar() {
   ctx.stroke();
   ctx.shadowBlur=0;
 
-  // blips
   state.radarData.forEach((v,i)=>{
     const a=i*(Math.PI*2/state.radarData.length);
     const d=v*r*0.9;
@@ -1041,7 +1063,7 @@ function drawRadar() {
   ctx.shadowBlur=0;
 }
 
-// ── UPDATE METRICS ────────────────────────────────────────────────────────
+// ── UPDATE METRICS ────────────────────────────────────────────────────
 function updateMetrics() {
   const t=state.t*0.005;
   state.metrics[0].val = (10+8*Math.sin(t*1.1)).toFixed(2);
@@ -1062,7 +1084,7 @@ function updateMetrics() {
   }).join('');
 }
 
-// ── UPDATE COHERENCE ──────────────────────────────────────────────────────
+// ── UPDATE COHERENCE ────────────────────────────────────────────────────
 const COHERENCE_NAMES=['ONDA ALFA','ONDA BETA','ONDA THETA','ONDA DELTA','ONDA GAMMA','ONDA LAMBDA'];
 const COHERENCE_COLORS=['#00e5ff','#00ff88','#b060ff','#ffaa00','#ff3355','#00e5ff'];
 
@@ -1093,7 +1115,7 @@ function updateCoherence() {
   });
 }
 
-// ── QUBIT REGISTER ────────────────────────────────────────────────────────
+// ── QUBIT REGISTER ───────────────────────────────────────────────────
 function initQubits() {
   const c=document.getElementById('qubitRegister');
   c.innerHTML=Array(8).fill(0).map((_,i)=>`<div class="qstate-bit off" id="qbit${i}">0</div>`).join('');
@@ -1113,7 +1135,7 @@ function updateQubits() {
   });
 }
 
-// ── EVENT LOG ─────────────────────────────────────────────────────────────
+// ── EVENT LOG ──────────────────────────────────────────────────────
 const LOG_MESSAGES=[
   ['cyan',  'Entrelazamiento cuántico estabilizado en {freq} Hz'],
   ['green', 'Pico de coherencia detectado: {coh}%'],
@@ -1122,9 +1144,11 @@ const LOG_MESSAGES=[
   ['green', 'Vector campo de torsión bloqueado'],
   ['amber', 'Aumento emisión biofoton detectado'],
   ['cyan',  'Resonancia campo escalar lograda'],
-  ['red',   'Advertencia: fuga dimensional @ {freq} Hz'],
+  ['red',   'ADVERTENCIA: Fuga dimensional @ {freq} Hz'],
   ['green', 'Sincronización onda alfa: {coh}%'],
   ['cyan',  'Armónico resonancia Planck detectado'],
+  ['red',   '⚠️ ALERTA ENTROPÍA: Se acerca al límite de Bekenstein'],
+  ['red',   '⚠️ CRÍTICO: Colapso dimensional inminente'],
 ];
 
 function addLog() {
@@ -1143,7 +1167,7 @@ function addLog() {
   if(entries.length>12) entries[entries.length-1].remove();
 }
 
-// ── UPDATE ENTANGLEMENT MATRIX ────────────────────────────────────────────
+// ── UPDATE ENTANGLEMENT MATRIX ────────────────────────────────────
 function updateEntanglement() {
   const n=8;
   for(let i=0;i<n;i++){
@@ -1155,31 +1179,95 @@ function updateEntanglement() {
   }
 }
 
-// ── HEADER UPDATES ────────────────────────────────────────────────────────
+// ── UPDATE ENTROPY & BEKENSTEIN ────────────────────────────────────
+function updateEntropy() {
+  state.entropy = calculateShannon();
+  const pct = state.entropy / BEKENSTEIN_LIMIT;
+
+  // Actualizar el relleno del límite Bekenstein
+  const bekenFill = document.getElementById('bekenFill');
+  if(bekenFill) {
+    bekenFill.style.width = (pct*100) + '%';
+  }
+
+  // Cambiar color según el porcentaje
+  if(pct < 0.5) {
+    bekenFill.style.background = 'linear-gradient(90deg, #00ff88, #ffaa00)';
+  } else if(pct < 0.85) {
+    bekenFill.style.background = 'linear-gradient(90deg, #ffaa00, #ff3355)';
+  } else {
+    bekenFill.style.background = 'linear-gradient(90deg, #ff3355, #8b0000)';
+  }
+
+  // Actualizar valores en la UI
+  document.getElementById('entropyVal').textContent = state.entropy.toFixed(2);
+  document.getElementById('infoDensity').textContent = (pct*100).toFixed(1) + '%';
+  document.getElementById('hEntropy').textContent = state.entropy.toFixed(2) + ' bits';
+  document.getElementById('hBekenPercent').textContent = (pct*100).toFixed(0) + '%';
+
+  // ALERTA COLAPSO
+  let collapseMsg = 'NULO';
+  let collapseStyle = 'color:var(--green)';
+  if(pct > CRITICAL_THRESHOLD) {
+    collapseMsg = '⚠️ COLAPSO CRÍTICO';
+    collapseStyle = 'color:var(--red);animation:pulse-danger 1s infinite';
+    state.isCollapsing = true;
+    document.body.classList.add('glitch');
+  } else if(pct > COLLAPSE_THRESHOLD) {
+    collapseMsg = '⚠️ ALERTA COLAPSO';
+    collapseStyle = 'color:var(--amber)';
+    state.isCollapsing = false;
+    document.body.classList.remove('glitch');
+    if(Math.random()<0.1) addLog();
+  } else {
+    state.isCollapsing = false;
+    document.body.classList.remove('glitch');
+  }
+
+  const alertEl = document.getElementById('collapseAlert');
+  if(alertEl) {
+    alertEl.textContent = collapseMsg;
+    alertEl.style.cssText = collapseStyle;
+  }
+
+  const statusEl = document.getElementById('hCollapseState');
+  if(statusEl) {
+    if(pct > CRITICAL_THRESHOLD) {
+      statusEl.textContent = 'CRÍTICO';
+      statusEl.className = 'status-value red';
+    } else if(pct > COLLAPSE_THRESHOLD) {
+      statusEl.textContent = 'COLAPSO';
+      statusEl.className = 'status-value amber';
+    } else {
+      statusEl.textContent = 'ESTABLE';
+      statusEl.className = 'status-value green';
+    }
+  }
+}
+
+// ── HEADER UPDATES ────────────────────────────────────────────────
 function updateHeader() {
   document.getElementById('hFreq').textContent = state.freq.toFixed(2)+' Hz';
   document.getElementById('hCoherence').textContent = state.coherences[0].toFixed(1)+'%';
   const ph=(state.phase*180/Math.PI)%360;
-  document.getElementById('hPhase').textContent = 'Φ '+ph.toFixed(2)+'°';
   document.getElementById('dialReadout').textContent = state.freq.toFixed(2);
 }
 
-// ── MAIN LOOP ─────────────────────────────────────────────────────────────
+// ── MAIN LOOP ──────────────────────────────────────────────────
 let lastLog=0;
 function tick(ts) {
   if(!state.frozen){
     state.t += 1;
     state.phase += 0.03 + state.freq*0.0001;
     state.lissPhase += 0.008;
-    if(state.waterfallRows.length<waterfallEl.height || state.t%2===0) updateWaterfall();
   }
 
+  updateEntropy();
   drawScope();
   drawSpectrogram();
   drawLissajous();
   updateEntanglement();
   drawEntanglement();
-  drawWaterfall();
   drawAtom();
   drawDial();
   drawRadar();
@@ -1191,17 +1279,14 @@ function tick(ts) {
   if(state.t - lastLog > 120 && !state.frozen){
     addLog();
     lastLog=state.t;
-    // randomize radar blip
     const i=Math.floor(Math.random()*state.radarData.length);
-    state.radarData[i]=rnd(0.3,0.95);
-    // shift radar angle for blip
     state.radarData[i]=rnd(0.3,0.95);
   }
 
   requestAnimationFrame(tick);
 }
 
-// ── CONTROLS ──────────────────────────────────────────────────────────────
+// ── CONTROLS ────────────────────────────────────────────────────
 document.getElementById('modeControls').querySelectorAll('.btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('#modeControls .btn').forEach(b=>b.classList.remove('active'));
@@ -1246,6 +1331,7 @@ document.getElementById('btnFreeze').addEventListener('click',()=>{
 document.getElementById('btnReset').addEventListener('click',()=>{
   state.t=0;state.phase=0;state.lissPhase=0;
   state.waterfallRows=[];state.particles=[];
+  document.body.classList.remove('glitch');
   addLog();
 });
 
@@ -1284,7 +1370,7 @@ window.addEventListener('mousemove',e=>{
 });
 window.addEventListener('mouseup',()=>{dialDragging=false;dialEl.style.cursor='grab';});
 
-// ── INIT ──────────────────────────────────────────────────────────────────
+// ── INIT ────────────────────────────────────────────────────────
 initCoherence();
 initQubits();
 addLog();
