@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quantum Resonance Analyzer — QRA-9000</title>
+<title>Analizador de Resonancia Cuántica — QRA-9000</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 
@@ -361,8 +361,8 @@ input[type=range]::-webkit-slider-thumb {
       </svg>
     </div>
     <div class="logo-text">
-      <h1>Quantum Resonance Analyzer</h1>
-      <p>QRA-9000 · SERIES IV · DEEP FIELD EDITION</p>
+      <h1>Analizador de Resonancia Cuántica</h1>
+      <p>QRA-9000 · SERIE IV · EDICIÓN CAMPO PROFUNDO</p>
     </div>
   </div>
   <div class="header-status">
@@ -371,19 +371,19 @@ input[type=range]::-webkit-slider-thumb {
       <span class="status-value cyan" id="hFreq">432.00 Hz</span>
     </div>
     <div class="status-item">
-      <span class="status-label">COHERENCE</span>
+      <span class="status-label">COHERENCIA</span>
       <span class="status-value green" id="hCoherence">98.7%</span>
     </div>
     <div class="status-item">
-      <span class="status-label">PHASE</span>
+      <span class="status-label">FASE</span>
       <span class="status-value amber" id="hPhase">Φ 0.00°</span>
     </div>
     <div class="status-item">
-      <span class="status-label">ENTANGLE</span>
-      <span class="status-value cyan" id="hEntangle">ACTIVE</span>
+      <span class="status-label">ENTRELAZ.</span>
+      <span class="status-value cyan" id="hEntangle">ACTIVO</span>
     </div>
   </div>
-  <div class="header-alert">● SYSTEM ONLINE</div>
+  <div class="header-alert">● SISTEMA EN LÍNEA</div>
 </header>
 
 <!-- MAIN GRID -->
@@ -394,7 +394,7 @@ input[type=range]::-webkit-slider-thumb {
 
     <!-- Atom display -->
     <div class="panel">
-      <div class="panel-title">QUANTUM STATE VISUALIZER <span class="panel-badge badge-active">ACTIVE</span></div>
+      <div class="panel-title">VISUALIZADOR ESTADO CUÁNTICO <span class="panel-badge badge-active">ACTIVO</span></div>
       <div class="atom-container">
         <canvas id="atomCanvas" width="220" height="160"></canvas>
       </div>
@@ -402,17 +402,17 @@ input[type=range]::-webkit-slider-thumb {
 
     <!-- Metrics -->
     <div class="panel">
-      <div class="panel-title">FIELD METRICS <span class="panel-badge badge-live">LIVE</span></div>
+      <div class="panel-title">MÉTRICAS DE CAMPO <span class="panel-badge badge-live">EN VIVO</span></div>
       <div id="metricsContainer"></div>
     </div>
 
     <!-- Dial -->
     <div class="panel">
-      <div class="panel-title">RESONANCE FREQUENCY</div>
+      <div class="panel-title">FRECUENCIA DE RESONANCIA</div>
       <div class="dial-wrap">
         <canvas id="dialCanvas" width="180" height="180"></canvas>
         <div class="dial-readout" id="dialReadout">432.00</div>
-        <div class="dial-unit">HERTZ · QUANTUM TUNED</div>
+        <div class="dial-unit">HERTZ · SINTONIZADO CUÁNTICO</div>
       </div>
     </div>
 
@@ -423,32 +423,32 @@ input[type=range]::-webkit-slider-thumb {
 
     <!-- Main oscilloscope -->
     <div class="panel main-scope" id="scopePanel">
-      <div class="panel-title">QUANTUM WAVEFORM OSCILLOSCOPE <span class="panel-badge badge-live">LIVE</span></div>
+      <div class="panel-title">OSCILOSCOPIO FORMA DE ONDA CUÁNTICA <span class="panel-badge badge-live">EN VIVO</span></div>
       <canvas id="scopeCanvas"></canvas>
       <canvas id="particleCanvas"></canvas>
     </div>
 
     <!-- Spectrogram -->
     <div class="panel spectrogram-wrap">
-      <div class="panel-title">SPECTRAL DENSITY ANALYSIS <span class="panel-badge badge-live">LIVE</span></div>
+      <div class="panel-title">ANÁLISIS DENSIDAD ESPECTRAL <span class="panel-badge badge-live">EN VIVO</span></div>
       <canvas id="spectroCanvas"></canvas>
     </div>
 
     <!-- Lissajous + Entanglement -->
     <div class="lissajous-row">
       <div class="panel lissajous-wrap" style="flex-direction:column;gap:6px;justify-content:flex-start;padding:10px;">
-        <div class="panel-title" style="width:100%">LISSAJOUS FIGURE <span class="panel-badge badge-active">XY</span></div>
+        <div class="panel-title" style="width:100%">FIGURA DE LISSAJOUS <span class="panel-badge badge-active">XY</span></div>
         <canvas id="lissajousCanvas" width="200" height="130"></canvas>
       </div>
       <div class="panel lissajous-wrap" style="flex-direction:column;gap:6px;justify-content:flex-start;padding:10px;">
-        <div class="panel-title" style="width:100%">ENTANGLEMENT MATRIX <span class="panel-badge badge-active">8Q</span></div>
+        <div class="panel-title" style="width:100%">MATRIZ ENTRELAZAMIENTO <span class="panel-badge badge-active">8Q</span></div>
         <canvas id="entanglementCanvas" width="200" height="130"></canvas>
       </div>
     </div>
 
     <!-- Waterfall -->
     <div class="panel waterfall-wrap">
-      <div class="panel-title">FREQUENCY WATERFALL <span class="panel-badge badge-live">LIVE</span></div>
+      <div class="panel-title">CASCADA DE FRECUENCIAS <span class="panel-badge badge-live">EN VIVO</span></div>
       <canvas id="waterfallCanvas"></canvas>
     </div>
 
@@ -459,7 +459,7 @@ input[type=range]::-webkit-slider-thumb {
 
     <!-- Radar -->
     <div class="panel">
-      <div class="panel-title">QUANTUM FIELD RADAR <span class="panel-badge badge-live">SCAN</span></div>
+      <div class="panel-title">RADAR CAMPO CUÁNTICO <span class="panel-badge badge-live">BARRIDO</span></div>
       <div class="radar-wrap">
         <canvas id="radarCanvas" width="220" height="160"></canvas>
       </div>
@@ -467,19 +467,19 @@ input[type=range]::-webkit-slider-thumb {
 
     <!-- Coherence bars -->
     <div class="panel">
-      <div class="panel-title">DIMENSIONAL COHERENCE <span class="panel-badge badge-warn">MONITOR</span></div>
+      <div class="panel-title">COHERENCIA DIMENSIONAL <span class="panel-badge badge-warn">MONITOR</span></div>
       <div id="coherenceContainer"></div>
     </div>
 
     <!-- Quantum bits -->
     <div class="panel">
-      <div class="panel-title">QUBIT REGISTER <span class="panel-badge badge-active">|ψ⟩</span></div>
+      <div class="panel-title">REGISTRO QUBIT <span class="panel-badge badge-active">|ψ⟩</span></div>
       <div class="qstate" id="qubitRegister"></div>
     </div>
 
     <!-- Event log -->
     <div class="panel">
-      <div class="panel-title">QUANTUM EVENT LOG</div>
+      <div class="panel-title">REGISTRO DE EVENTOS CUÁNTICOS</div>
       <div class="event-log" id="eventLog"></div>
     </div>
 
@@ -488,48 +488,48 @@ input[type=range]::-webkit-slider-thumb {
   <!-- BOTTOM BAR -->
   <div class="bottom-bar">
     <div class="panel" style="flex:2">
-      <div class="panel-title">SIGNAL CONTROLS</div>
+      <div class="panel-title">CONTROLES DE SEÑAL</div>
       <div class="controls" id="modeControls">
-        <button class="btn active" data-mode="sine">SINE WAVE</button>
-        <button class="btn" data-mode="square">SQUARE</button>
-        <button class="btn" data-mode="sawtooth">SAWTOOTH</button>
-        <button class="btn" data-mode="chaos">CHAOS</button>
-        <button class="btn" data-mode="quantum">QUANTUM</button>
+        <button class="btn active" data-mode="sine">ONDA SENO</button>
+        <button class="btn" data-mode="square">CUADRADA</button>
+        <button class="btn" data-mode="sawtooth">DIENTE SIERRA</button>
+        <button class="btn" data-mode="chaos">CAOS</button>
+        <button class="btn" data-mode="quantum">CUÁNTICA</button>
         <button class="btn" data-mode="binaural">BINAURAL</button>
       </div>
       <div class="slider-row">
-        <span class="slider-label">AMPLITUDE</span>
+        <span class="slider-label">AMPLITUD</span>
         <input type="range" id="ampSlider" min="10" max="100" value="60">
         <span class="slider-val" id="ampVal">60%</span>
       </div>
       <div class="slider-row">
-        <span class="slider-label">FREQUENCY</span>
+        <span class="slider-label">FRECUENCIA</span>
         <input type="range" id="freqSlider" min="1" max="1000" value="432">
         <span class="slider-val" id="freqVal">432 Hz</span>
       </div>
       <div class="slider-row">
-        <span class="slider-label">MODULATION</span>
+        <span class="slider-label">MODULACIÓN</span>
         <input type="range" id="modSlider" min="0" max="100" value="30">
         <span class="slider-val" id="modVal">30%</span>
       </div>
     </div>
     <div class="panel" style="flex:1">
-      <div class="panel-title">SYSTEM CONTROLS</div>
+      <div class="panel-title">CONTROLES DEL SISTEMA</div>
       <div class="controls">
-        <button class="btn active" id="btnScan">● SCANNING</button>
-        <button class="btn" id="btnFreeze">❚❚ FREEZE</button>
-        <button class="btn danger" id="btnReset">↺ RESET</button>
-        <button class="btn" id="btnCapture">⊡ CAPTURE</button>
-        <button class="btn" id="btnBoost">↑ BOOST</button>
+        <button class="btn active" id="btnScan">● ESCANEANDO</button>
+        <button class="btn" id="btnFreeze">❚❚ CONGELAR</button>
+        <button class="btn danger" id="btnReset">↺ REINICIAR</button>
+        <button class="btn" id="btnCapture">⊡ CAPTURAR</button>
+        <button class="btn" id="btnBoost">↑ POTENCIA</button>
       </div>
     </div>
     <div class="panel" style="flex:1">
-      <div class="panel-title">ANALYSIS PROFILE</div>
+      <div class="panel-title">PERFIL DE ANÁLISIS</div>
       <div class="controls" id="profileControls">
-        <button class="btn active" data-profile="standard">STANDARD</button>
-        <button class="btn" data-profile="deep">DEEP SCAN</button>
-        <button class="btn" data-profile="resonance">RESONANCE</button>
-        <button class="btn" data-profile="void">VOID MODE</button>
+        <button class="btn active" data-profile="standard">ESTÁNDAR</button>
+        <button class="btn" data-profile="deep">ESCANEO PROFUNDO</button>
+        <button class="btn" data-profile="resonance">RESONANCIA</button>
+        <button class="btn" data-profile="void">MODO VACÍO</button>
       </div>
     </div>
   </div>
@@ -552,12 +552,12 @@ const state = {
   phase: 0,
   coherences: [94.2, 87.5, 91.0, 88.3, 96.1, 82.7],
   metrics: [
-    {name:'SCALAR FIELD',    val:0, color:'#00e5ff', unit:'T'},
-    {name:'ZERO POINT',      val:0, color:'#00ff88', unit:'eV'},
-    {name:'SPIN COHERENCE',  val:0, color:'#b060ff', unit:'%'},
-    {name:'TORSION FIELD',   val:0, color:'#ffaa00', unit:'nT'},
-    {name:'BIOPHOTON FLUX',  val:0, color:'#00e5ff', unit:'ph/s'},
-    {name:'PLANCK RESONANCE',val:0, color:'#00ff88', unit:'Hz'},
+    {name:'CAMPO ESCALAR',   val:0, color:'#00e5ff', unit:'T'},
+    {name:'PUNTO CERO',      val:0, color:'#00ff88', unit:'eV'},
+    {name:'COHERENCIA SPIN', val:0, color:'#b060ff', unit:'%'},
+    {name:'CAMPO TORSIÓN',   val:0, color:'#ffaa00', unit:'nT'},
+    {name:'FLUJO BIOFOTON',  val:0, color:'#00e5ff', unit:'ph/s'},
+    {name:'RESONANCIA PLANCK',val:0, color:'#00ff88', unit:'Hz'},
   ],
   qubits: Array(8).fill(0),
   radarData: Array(12).fill(0).map(()=>Math.random()),
@@ -1063,7 +1063,7 @@ function updateMetrics() {
 }
 
 // ── UPDATE COHERENCE ──────────────────────────────────────────────────────
-const COHERENCE_NAMES=['ALPHA WAVE','BETA WAVE','THETA WAVE','DELTA WAVE','GAMMA WAVE','LAMBDA WAVE'];
+const COHERENCE_NAMES=['ONDA ALFA','ONDA BETA','ONDA THETA','ONDA DELTA','ONDA GAMMA','ONDA LAMBDA'];
 const COHERENCE_COLORS=['#00e5ff','#00ff88','#b060ff','#ffaa00','#ff3355','#00e5ff'];
 
 function initCoherence() {
@@ -1115,16 +1115,16 @@ function updateQubits() {
 
 // ── EVENT LOG ─────────────────────────────────────────────────────────────
 const LOG_MESSAGES=[
-  ['cyan',  'Quantum entanglement stabilized at {freq} Hz'],
-  ['green', 'Coherence peak detected: {coh}%'],
-  ['amber', 'Phase variance +{mod}° — compensating'],
-  ['cyan',  'Zero-point energy flux normalized'],
-  ['green', 'Torsion field vector locked'],
-  ['amber', 'Biophoton emission surge detected'],
-  ['cyan',  'Scalar field resonance achieved'],
-  ['red',   'Warning: dimensional bleed-through @ {freq} Hz'],
-  ['green', 'Alpha wave sync: {coh}%'],
-  ['cyan',  'Planck resonance harmonic detected'],
+  ['cyan',  'Entrelazamiento cuántico estabilizado en {freq} Hz'],
+  ['green', 'Pico de coherencia detectado: {coh}%'],
+  ['amber', 'Varianza de fase +{mod}° — compensando'],
+  ['cyan',  'Flujo de energía punto cero normalizado'],
+  ['green', 'Vector campo de torsión bloqueado'],
+  ['amber', 'Aumento emisión biofoton detectado'],
+  ['cyan',  'Resonancia campo escalar lograda'],
+  ['red',   'Advertencia: fuga dimensional @ {freq} Hz'],
+  ['green', 'Sincronización onda alfa: {coh}%'],
+  ['cyan',  'Armónico resonancia Planck detectado'],
 ];
 
 function addLog() {
@@ -1239,7 +1239,7 @@ modSlider.addEventListener('input',()=>{
 document.getElementById('btnFreeze').addEventListener('click',()=>{
   state.frozen=!state.frozen;
   const btn=document.getElementById('btnFreeze');
-  btn.textContent=state.frozen?'▶ RESUME':'❚❚ FREEZE';
+  btn.textContent=state.frozen?'▶ REANUDAR':'❚❚ CONGELAR';
   btn.classList.toggle('active',state.frozen);
 });
 
@@ -1252,8 +1252,8 @@ document.getElementById('btnReset').addEventListener('click',()=>{
 document.getElementById('btnCapture').addEventListener('click',()=>{
   const btn=document.getElementById('btnCapture');
   btn.classList.add('active');
-  btn.textContent='✓ CAPTURED';
-  setTimeout(()=>{btn.classList.remove('active');btn.textContent='⊡ CAPTURE';},1500);
+  btn.textContent='✓ CAPTURADO';
+  setTimeout(()=>{btn.classList.remove('active');btn.textContent='⊡ CAPTURAR';},1500);
   addLog();
 });
 
@@ -1261,7 +1261,7 @@ document.getElementById('btnBoost').addEventListener('click',()=>{
   const btn=document.getElementById('btnBoost');
   state.boost = state.boost===1?2:1;
   btn.classList.toggle('active',state.boost===2);
-  btn.textContent = state.boost===2?'↑ BOOSTED':'↑ BOOST';
+  btn.textContent = state.boost===2?'↑ POTENCIADO':'↑ POTENCIA';
 });
 
 // Dial drag
