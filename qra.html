@@ -852,8 +852,12 @@ function drawScope() {
     ctx.shadowBlur = width > 1 ? 8 : 0;
     ctx.beginPath();
     for(let x=0;x<W;x++){
-      const t = state.t - (W-x)*0.5 + offset;
+      // Usar timeScale para zoom horizontal
+      const t = state.t - (W-x)*0.5*state.timeScale + offset;
       let y = H/2 - sampleWave(t, state.freq, state.amp*(H*0.42), state.mod, state.mode);
+
+      // Aplicar offsetY (desplazamiento vertical)
+      y += (state.offsetY / 100) * (H * 0.3);
 
       // Distorsión cerca del colapso
       if(distortion > 0) {
