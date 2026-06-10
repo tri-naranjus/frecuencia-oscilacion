@@ -364,6 +364,51 @@ input[type=range]::-webkit-slider-thumb {
   margin-top:4px;
   line-height:1.4;
 }
+
+/* OSCILLOSCOPE DIALS */
+.dial-group {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.dial-item {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+.dial-label {
+  font-size:.5rem;
+  letter-spacing:.15em;
+  color:var(--text2);
+  text-transform:uppercase;
+}
+.dial-canvas-wrap {
+  position:relative;
+  width:100px;
+  height:100px;
+}
+.dial-canvas-wrap canvas {
+  cursor:grab;
+  border-radius:50%;
+}
+.dial-canvas-wrap canvas:active {
+  cursor:grabbing;
+}
+.dial-value {
+  font-size:.65rem;
+  color:var(--cyan);
+  text-shadow:0 0 6px var(--cyan);
+  letter-spacing:.1em;
+  min-width:60px;
+  text-align:center;
+  font-weight:bold;
+}
+.dial-unit {
+  font-size:.45rem;
+  color:var(--text2);
+  letter-spacing:.1em;
+}
 </style>
 </head>
 <body>
@@ -421,6 +466,44 @@ input[type=range]::-webkit-slider-thumb {
         <canvas id="dialCanvas" width="180" height="180"></canvas>
         <div class="dial-readout" id="dialReadout">432.00</div>
         <div class="dial-unit">HERTZ • CUÁNTICO</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">CONTROLES OSCILOSCOPIO <span class="panel-badge badge-live">ANALÓGICO</span></div>
+      <div class="dial-group">
+        <div class="dial-item">
+          <span class="dial-label">OFFSET Y</span>
+          <div class="dial-canvas-wrap">
+            <canvas id="dialOffsetY" width="100" height="100" class="scope-dial"></canvas>
+          </div>
+          <div class="dial-value" id="offsetYVal">0.0</div>
+          <div class="dial-unit">mV</div>
+        </div>
+        <div class="dial-item">
+          <span class="dial-label">ESCALA TIEMPO</span>
+          <div class="dial-canvas-wrap">
+            <canvas id="dialTimeScale" width="100" height="100" class="scope-dial"></canvas>
+          </div>
+          <div class="dial-value" id="timeScaleVal">1.0x</div>
+          <div class="dial-unit">DIV/s</div>
+        </div>
+        <div class="dial-item">
+          <span class="dial-label">TRIGGER</span>
+          <div class="dial-canvas-wrap">
+            <canvas id="dialTrigger" width="100" height="100" class="scope-dial"></canvas>
+          </div>
+          <div class="dial-value" id="triggerVal">50%</div>
+          <div class="dial-unit">NIVEL</div>
+        </div>
+        <div class="dial-item">
+          <span class="dial-label">ACOPLAMIENTO</span>
+          <div class="dial-canvas-wrap">
+            <canvas id="dialCoupling" width="100" height="100" class="scope-dial"></canvas>
+          </div>
+          <div class="dial-value" id="couplingVal">AC</div>
+          <div class="dial-unit">MODO</div>
+        </div>
       </div>
     </div>
   </div>
@@ -598,6 +681,11 @@ const state = {
   entropySamples: [],
   collapseIntensity: 0,
   isCollapsing: false,
+  // OSCILLOSCOPE DIALS
+  offsetY: 0,      // -100 a 100
+  timeScale: 1.0,  // 0.1 a 5.0
+  trigger: 0.5,    // 0 a 1
+  coupling: 0,     // 0=AC, 1=DC, 2=GND
 };
 
 // ── CANVAS REFS ────────────────────────────────────────────────────────────
@@ -618,6 +706,17 @@ const entCtx       = entEl.getContext('2d');
 const atomCtx      = atomEl.getContext('2d');
 const dialCtx      = dialEl.getContext('2d');
 const radarCtx     = radarEl.getContext('2d');
+
+// Oscilloscope dials
+const dialOffsetYEl = document.getElementById('dialOffsetY');
+const dialTimeScaleEl = document.getElementById('dialTimeScale');
+const dialTriggerEl = document.getElementById('dialTrigger');
+const dialCouplingEl = document.getElementById('dialCoupling');
+
+const dialOffsetYCtx = dialOffsetYEl.getContext('2d');
+const dialTimeScaleCtx = dialTimeScaleEl.getContext('2d');
+const dialTriggerCtx = dialTriggerEl.getContext('2d');
+const dialCouplingCtx = dialCouplingEl.getContext('2d');
 
 function resizeCanvases() {
   const scopePanel = document.getElementById('scopePanel');
@@ -1001,6 +1100,79 @@ function drawDial() {
   ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fill();
 }
 
+// ── DRAW OSCILLOSCOPE DIALS ───────────────────────────────────────
+function drawOscDial(ctx, value, min, max, label, unit, color='#00e5ff') {
+  const W = ctx.canvas.width, H = ctx.canvas.height;
+  const cx = W/2, cy = H/2, r = W/2 - 5;
+
+  ctx.clearRect(0,0,W,H);
+
+  // outer ring
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI*2);
+  ctx.stroke();
+
+  // inner ring
+  ctx.strokeStyle = 'rgba(0,58,90,.5)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r-8, 0, Math.PI*2);
+  ctx.stroke();
+
+  // tick marks (270° to -90°, es decir 270 grados de rango)
+  const startAngle = -Math.PI*1.5; // 270°
+  const endAngle = Math.PI*0.5;    // 90°
+  const range = endAngle - startAngle;
+
+  for(let i=0; i<=10; i++) {
+    const angle = startAngle + (i/10)*range;
+    const isMajor = i % 2 === 0;
+    const r1 = r - (isMajor ? 12 : 6);
+    const r2 = r - 2;
+
+    ctx.strokeStyle = isMajor ? color : 'rgba(0,58,90,.7)';
+    ctx.lineWidth = isMajor ? 2 : 1;
+    ctx.beginPath();
+    ctx.moveTo(cx + r1*Math.cos(angle), cy + r1*Math.sin(angle));
+    ctx.lineTo(cx + r2*Math.cos(angle), cy + r2*Math.sin(angle));
+    ctx.stroke();
+
+    // numbers
+    if(isMajor) {
+      const v = min + (i/10)*(max-min);
+      const x = cx + (r-18)*Math.cos(angle);
+      const y = cy + (r-18)*Math.sin(angle);
+      ctx.fillStyle = color;
+      ctx.font = 'bold .4rem monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(v.toFixed(1), x, y);
+    }
+  }
+
+  // needle
+  const pct = (value - min) / (max - min);
+  const needleAngle = startAngle + pct * range;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 10;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + (r-15)*Math.cos(needleAngle), cy + (r-15)*Math.sin(needleAngle));
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // center dot
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 4, 0, Math.PI*2);
+  ctx.fill();
+}
+
 // ── DRAW RADAR ────────────────────────────────────────────────────────
 function drawRadar() {
   const W=radarEl.width, H=radarEl.height;
@@ -1245,6 +1417,77 @@ function updateEntropy() {
   }
 }
 
+// ── UPDATE OSCILLOSCOPE DIALS ────────────────────────────────────
+function updateOscDials() {
+  // Offset Y
+  drawOscDial(dialOffsetYCtx, state.offsetY, -100, 100, 'OFFSET Y', 'mV', '#00e5ff');
+  document.getElementById('offsetYVal').textContent = state.offsetY.toFixed(1);
+
+  // Time Scale
+  drawOscDial(dialTimeScaleCtx, state.timeScale, 0.1, 5.0, 'ESCALA TIEMPO', 'DIV/s', '#00ff88');
+  document.getElementById('timeScaleVal').textContent = state.timeScale.toFixed(2) + 'x';
+
+  // Trigger
+  drawOscDial(dialTriggerCtx, state.trigger*100, 0, 100, 'TRIGGER', '%', '#ffaa00');
+  document.getElementById('triggerVal').textContent = (state.trigger*100).toFixed(0) + '%';
+
+  // Coupling (rotational, 3 posiciones: AC/DC/GND)
+  const W = dialCouplingEl.width, H = dialCouplingEl.height;
+  const ctx = dialCouplingCtx;
+  const cx = W/2, cy = H/2, r = W/2 - 5;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle = '#b060ff';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI*2);
+  ctx.stroke();
+
+  // 3 posiciones (0°, 120°, 240°)
+  const couplingModes = ['AC', 'DC', 'GND'];
+  const couplingColors = ['#00ff88', '#ffaa00', '#ff3355'];
+
+  for(let i=0; i<3; i++) {
+    const angle = (i/3)*Math.PI*2 - Math.PI/2;
+    const r1 = r - 10, r2 = r - 2;
+    ctx.strokeStyle = state.coupling===i ? couplingColors[i] : 'rgba(0,58,90,.5)';
+    ctx.lineWidth = state.coupling===i ? 3 : 1;
+    ctx.beginPath();
+    ctx.moveTo(cx + r1*Math.cos(angle), cy + r1*Math.sin(angle));
+    ctx.lineTo(cx + r2*Math.cos(angle), cy + r2*Math.sin(angle));
+    ctx.stroke();
+
+    // label
+    const lx = cx + (r-20)*Math.cos(angle);
+    const ly = cy + (r-20)*Math.sin(angle);
+    ctx.fillStyle = state.coupling===i ? couplingColors[i] : 'rgba(0,58,90,.7)';
+    ctx.font = 'bold .5rem monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(couplingModes[i], lx, ly);
+  }
+
+  // needle
+  const needleAngle = (state.coupling/3)*Math.PI*2 - Math.PI/2;
+  ctx.strokeStyle = '#b060ff';
+  ctx.lineWidth = 3;
+  ctx.shadowColor = '#b060ff';
+  ctx.shadowBlur = 10;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + (r-15)*Math.cos(needleAngle), cy + (r-15)*Math.sin(needleAngle));
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  ctx.fillStyle = '#b060ff';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 4, 0, Math.PI*2);
+  ctx.fill();
+
+  document.getElementById('couplingVal').textContent = couplingModes[state.coupling];
+}
+
 // ── HEADER UPDATES ────────────────────────────────────────────────
 function updateHeader() {
   document.getElementById('hFreq').textContent = state.freq.toFixed(2)+' Hz';
@@ -1274,6 +1517,7 @@ function tick(ts) {
   updateMetrics();
   updateCoherence();
   updateQubits();
+  updateOscDials();
   updateHeader();
 
   if(state.t - lastLog > 120 && !state.frozen){
@@ -1369,6 +1613,76 @@ window.addEventListener('mousemove',e=>{
   document.getElementById('freqVal').textContent=Math.round(state.freq)+' Hz';
 });
 window.addEventListener('mouseup',()=>{dialDragging=false;dialEl.style.cursor='grab';});
+
+// Oscilloscope dial interactions
+function makeDialDraggable(canvas, getVal, setVal, min, max, circular=false) {
+  let dragging = false;
+  let startAngle = 0;
+  let startVal = 0;
+
+  canvas.addEventListener('mousedown', e => {
+    dragging = true;
+    const r = canvas.getBoundingClientRect();
+    const cx = r.left + r.width/2;
+    const cy = r.top + r.height/2;
+    startAngle = Math.atan2(e.clientY - cy, e.clientX - cx);
+    startVal = getVal();
+    canvas.style.cursor = 'grabbing';
+  });
+
+  window.addEventListener('mousemove', e => {
+    if(!dragging) return;
+    const r = canvas.getBoundingClientRect();
+    const cx = r.left + r.width/2;
+    const cy = r.top + r.height/2;
+    const angle = Math.atan2(e.clientY - cy, e.clientX - cx);
+    const delta = angle - startAngle;
+
+    if(circular) {
+      // Para 3 posiciones (Coupling)
+      let newVal = startVal + Math.round(delta / (Math.PI*2) * 3);
+      newVal = ((newVal % 3) + 3) % 3;
+      setVal(newVal);
+    } else {
+      // Para rango continuo
+      const range = 270 * Math.PI / 180; // 270 grados
+      const pct = delta / range;
+      let newVal = startVal + pct * (max - min);
+      newVal = clamp(newVal, min, max);
+      setVal(newVal);
+    }
+  });
+
+  window.addEventListener('mouseup', () => {
+    dragging = false;
+    canvas.style.cursor = 'grab';
+  });
+}
+
+makeDialDraggable(dialOffsetYEl,
+  () => state.offsetY,
+  (v) => { state.offsetY = v; },
+  -100, 100
+);
+
+makeDialDraggable(dialTimeScaleEl,
+  () => state.timeScale,
+  (v) => { state.timeScale = v; },
+  0.1, 5.0
+);
+
+makeDialDraggable(dialTriggerEl,
+  () => state.trigger * 100,
+  (v) => { state.trigger = v / 100; },
+  0, 100
+);
+
+makeDialDraggable(dialCouplingEl,
+  () => state.coupling,
+  (v) => { state.coupling = v; },
+  0, 2,
+  true // circular
+);
 
 // ── INIT ────────────────────────────────────────────────────────
 initCoherence();
